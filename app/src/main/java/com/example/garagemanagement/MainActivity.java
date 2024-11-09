@@ -1,7 +1,11 @@
 package com.example.garagemanagement;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+
+import androidx.annotation.NonNull;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,22 +16,21 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.garagemanagement.adapter.AdapterViewPager;
+import com.example.garagemanagement.fragments.FragmentAccount;
 import com.example.garagemanagement.fragments.FragmentCars;
 import com.example.garagemanagement.fragments.FragmentHome;
 import com.example.garagemanagement.fragments.FragmentPayment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-//    ActivityMainBinding binding;
-
     ViewPager2 pagerMain;
     ArrayList<Fragment> fragmentArrayList = new ArrayList<>();
     BottomNavigationView bottomNav;
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,16 +42,19 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Deleting the weird margin bottom of the BottomNavigationView
         bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setOnApplyWindowInsetsListener((v, insets) ->
-            insets
+                insets
         );
 
+//        BottomNav and Pager: BEGIN
         pagerMain = findViewById(R.id.pagerMain);
 
         fragmentArrayList.add(new FragmentHome());
         fragmentArrayList.add(new FragmentCars());
         fragmentArrayList.add(new FragmentPayment());
+        fragmentArrayList.add(new FragmentAccount());
 
         AdapterViewPager adapterViewPager = new AdapterViewPager(this, fragmentArrayList);
         // setAdapter
@@ -62,36 +68,46 @@ public class MainActivity extends AppCompatActivity {
                     bottomNav.setSelectedItemId(R.id.itCars);
                 } else if (position == 2) {
                     bottomNav.setSelectedItemId(R.id.itPayment);
+                } else if (position == 3) {
+                    bottomNav.setSelectedItemId(R.id.itAccount);
                 }
                 super.onPageSelected(position);
             }
         });
 
+        bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.itHome) {
+                    pagerMain.setCurrentItem(0);
+                } else if (id == R.id.itCars) {
+                    pagerMain.setCurrentItem(1);
+                } else if (id == R.id.itPayment) {
+                    pagerMain.setCurrentItem(2);
+                } else if (id == R.id.itAccount) {
+                    pagerMain.setCurrentItem(3);
+                }
+                return true;
+            }
+        });
+//        BottomNav and Pager: END
 
+//        Header buttons logic:
+        ImageButton logoBtn = findViewById(R.id.logoBtn);
+        logoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bottomNav.setSelectedItemId(R.id.itHome);
+            }
+        });
 
-//        binding = ActivityMainBinding.inflate(getLayoutInflater());
-//        setContentView(binding.getRoot());
-//        replaceFragment(new HomeFragment());
-
-//        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
-//            int itemId = item.getItemId();
-//
-//            if (itemId == R.id.home) {
-//                replaceFragment(new HomeFragment());
-//            } else if (itemId == R.id.cars) {
-//                replaceFragment(new CarsFragment());
-//            } else if (itemId == R.id.payments) {
-//                replaceFragment(new PaymentFragment());
-//            }
-//
-//            return true;
-//        });
+        ImageButton notificationBtn = findViewById(R.id.notificationBtn);
+        notificationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Go to notification activity
+            }
+        });
     }
-
-//    private void replaceFragment(Fragment fragment) {
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//        fragmentTransaction.replace(R.id.frameLayout, fragment);
-//        fragmentTransaction.commit();
-//    }
 }
