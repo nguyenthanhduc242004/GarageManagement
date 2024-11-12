@@ -1,14 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.FragmentHome">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Home fragment" />
+        android:layout_height="wrap_content" >
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewReceiveCar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="50dp">
 
-</FrameLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:alpha="0.6"
+                    android:src="@drawable/tiep_nhan_xe" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:shadowColor="#000"
+                    android:shadowDx="4"
+                    android:shadowDy="4"
+                    android:shadowRadius="10"
+                    android:text="TIẾP NHẬN XE"
+                    android:textColor="#fff"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewCarRepair"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="50dp"
+            android:layout_marginHorizontal="28dp"
+            android:layout_below="@+id/cardViewReceiveCar"
+            android:layout_marginTop="16dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="72dp"
+                    android:alpha="0.4"
+                    android:src="@drawable/lap_phieu_sua_chua"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LẬP PHIẾU SỬA CHỮA"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="#fff"
+                    android:shadowColor="#000"
+                    android:shadowDx="4"
+                    android:shadowDy="4"
+                    android:shadowRadius="10"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"/>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <Button
+            android:id="@+id/tvNewCars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cardViewCarRepair"
+            android:layout_marginTop="20dp"
+            android:text="Xe Mới Tiếp Nhận"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:drawableEnd="@drawable/baseline_arrow_circle_right_24"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/white"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewNewCars"
+            android:layout_below="@+id/tvNewCars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            />
+
+        <Button
+            android:id="@+id/btnShowAllNewCars"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="28dp"
+            android:layout_height="wrap_content"
+            android:text="Xem Tất Cả"
+            android:layout_marginTop="12dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:backgroundTint="#1473e6"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/recyclerViewNewCars"/>
+
+        <Button
+            android:id="@+id/tvRepairingCars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnShowAllNewCars"
+            android:layout_marginTop="20dp"
+            android:text="Xe Đang Sửa"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:drawableEnd="@drawable/baseline_arrow_circle_right_24"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/white"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewRepairingCars"
+            android:layout_below="@+id/tvRepairingCars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            />
+
+        <Button
+            android:id="@+id/btnShowAllRepairingCars"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="28dp"
+            android:layout_height="wrap_content"
+            android:text="Xem Tất Cả"
+            android:layout_marginTop="12dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:backgroundTint="#1473e6"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/recyclerViewRepairingCars"/>
+
+        <Button
+            android:id="@+id/tvCompletedCars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnShowAllRepairingCars"
+            android:layout_marginTop="20dp"
+            android:text="Xe Mới Hoàn Thành"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:drawableEnd="@drawable/baseline_arrow_circle_right_24"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/white"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewCompletedCars"
+            android:layout_below="@+id/tvCompletedCars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="4dp"
+            />
+
+        <Button
+            android:id="@+id/btnShowAllCompletedCars"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="28dp"
+            android:layout_height="wrap_content"
+            android:text="Xem Tất Cả"
+            android:layout_marginTop="12dp"
+            android:paddingVertical="8dp"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:backgroundTint="#1473e6"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/recyclerViewCompletedCars"/>
+
+    </RelativeLayout>
+</androidx.core.widget.NestedScrollView>

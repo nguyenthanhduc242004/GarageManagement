@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+
         // Deleting the weird margin bottom of the BottomNavigationView
         bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setOnApplyWindowInsetsListener((v, insets) ->

@@ -4,19 +4,19 @@
 
 
 
-    <item android:title="Home"
+    <item android:title="Trang Chủ"
         android:icon="@drawable/baseline_home_24"
         app:showAsAction="ifRoom"
         android:id="@+id/itHome"/>
-    <item android:title="Cars"
+    <item android:title="Danh Sách Xe"
         android:icon="@drawable/baseline_directions_car_24"
         app:showAsAction="ifRoom"
         android:id="@+id/itCars"/>
-    <item android:title="Payment"
+    <item android:title="Thanh Toán"
         android:icon="@drawable/outline_payments_24"
         app:showAsAction="ifRoom"
         android:id="@+id/itPayment"/>
-    <item android:title="Account"
+    <item android:title="Tài Khoản"
         android:icon="@drawable/baseline_person_24"
         app:showAsAction="ifRoom"
         android:id="@+id/itAccount"/>
