@@ -23,12 +23,14 @@
                 android:layout_height="wrap_content">
 
                 <ImageButton
+                    android:id="@+id/imageButtonAddCar"
                     android:layout_width="match_parent"
                     android:layout_height="72dp"
                     android:alpha="0.6"
                     android:src="@drawable/tiep_nhan_xe" />
 
                 <TextView
+                    android:id="@+id/imageButtonAddRepairCard"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"

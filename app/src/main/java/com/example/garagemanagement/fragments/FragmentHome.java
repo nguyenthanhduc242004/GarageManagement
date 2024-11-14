@@ -1,5 +1,6 @@
 package com.example.garagemanagement.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -9,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
+import com.example.garagemanagement.AddCarActivity;
 import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.R;
 import com.example.garagemanagement.adapter.CarAdapter;
@@ -69,6 +72,15 @@ public class FragmentHome extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        ImageButton imageButtonAddCar = view.findViewById(R.id.imageButtonAddCar);
+        imageButtonAddCar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), AddCarActivity.class);
+                startActivity(intent);
+            }
+        });
 
 //        Fake call API
         Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 1);

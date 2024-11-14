@@ -63,7 +63,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#54e360"
+                android:backgroundTint="@color/green"
                 android:text="Thanh Toán"
                 android:textColor="@color/white"
                 android:paddingStart="12dp"

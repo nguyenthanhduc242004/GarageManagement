@@ -63,7 +63,7 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#ffa500"
+                android:backgroundTint="@color/yellow"
                 android:text="Sửa Chữa"
                 android:textColor="@color/white"
                 android:paddingStart="12dp"
