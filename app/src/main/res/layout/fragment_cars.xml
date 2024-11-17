@@ -60,7 +60,7 @@
             android:textAlignment="center"/>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewCarDetails"
+        android:id="@+id/recyclerViewCarList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/header">

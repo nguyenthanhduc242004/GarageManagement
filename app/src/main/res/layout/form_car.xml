@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvLicensePlateText"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_alignEnd="@+id/tvPhoneNumberText"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:text="Biển Số Xe"
+        android:textColor="@color/textColor" />
+
+    <EditText
+        android:id="@+id/etLicensePlate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvLicensePlateText"
+        android:layout_alignBottom="@+id/tvLicensePlateText"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/tvOwnerNameText"
+        android:ems="10"
+        android:inputType="text"
+        android:textColor="@color/textColor" />
+
+    <TextView
+        android:id="@+id/tvCarBrandText"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@+id/tvLicensePlateText"
+        android:layout_alignEnd="@+id/tvPhoneNumberText"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Hãng Xe"
+        android:textColor="@color/textColor" />
+
+    <Spinner
+        android:id="@+id/spinnerCarBrand"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvCarBrandText"
+        android:layout_alignBottom="@+id/tvCarBrandText"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/tvCarBrandText"
+        android:background="@drawable/border"
+        android:padding="4dp"
+        android:textColor="@color/textColor" />
+
+    <TextView
+        android:id="@+id/tvOwnerNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@+id/tvCarBrandText"
+        android:layout_alignEnd="@+id/tvPhoneNumberText"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Tên Chủ Xe"
+        android:textColor="@color/textColor" />
+
+    <EditText
+        android:id="@+id/etOwnerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvOwnerNameText"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/tvOwnerNameText"
+        android:ems="10"
+        android:inputType="text"
+        android:textColor="@color/textColor" />
+
+    <TextView
+        android:id="@+id/tvPhoneNumberText"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@+id/tvOwnerNameText"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Số Điện Thoại"
+        android:textColor="@color/textColor" />
+
+    <EditText
+        android:id="@+id/etPhoneNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvPhoneNumberText"
+        android:layout_alignBottom="@+id/tvPhoneNumberText"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/tvPhoneNumberText"
+        android:ems="10"
+        android:inputType="text"
+        android:textColor="@color/textColor" />
+
+    <TextView
+        android:id="@+id/tvAddressText"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@+id/tvPhoneNumberText"
+        android:layout_alignEnd="@+id/tvPhoneNumberText"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Địa Chỉ"
+        android:textColor="@color/textColor" />
+
+    <EditText
+        android:id="@+id/etAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvAddressText"
+        android:layout_alignBottom="@+id/tvAddressText"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/tvAddressText"
+        android:ems="10"
+        android:inputType="text"
+        android:textColor="@color/textColor" />
+
+    <TextView
+        android:id="@+id/tvReceiveDateText"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_below="@+id/tvAddressText"
+        android:layout_alignEnd="@+id/tvPhoneNumberText"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="Ngày Nhận"
+        android:textColor="@color/textColor" />
+
+    <Button
+        android:id="@+id/buttonDate"
+        style="?android:spinnerStyle"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvReceiveDateText"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@+id/tvReceiveDateText"
+        android:text="12/12/2023"
+        android:textColor="@color/textColor" />
+
+    <Button
+        android:id="@+id/buttonOpenCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvReceiveDateText"
+        android:layout_marginTop="12dp"
+        android:drawableLeft="@drawable/outline_camera_alt_24"
+        android:padding="12dp"
+        android:text="Thêm Ảnh Chụp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/textColor" />
+
+    <Button
+        android:id="@+id/buttonDeleteImage"
+        android:layout_marginTop="12dp"
+        android:padding="12dp"
+        android:drawableLeft="@drawable/baseline_delete_outline_24"
+        android:textColor="@color/white"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/tvReceiveDateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/red"
+        android:text="Xóa ảnh"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/ivCarImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/footerButtons"
+        android:layout_below="@+id/buttonOpenCamera"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp" />
+
+    <LinearLayout
+        android:id="@+id/footerButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/footerButtonLeft"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/yellow"
+            android:text="Thoát"
+            android:textColor="@color/white"
+            android:layout_marginEnd="8dp"
+            android:paddingVertical="4dp"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/footerButtonRight"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            android:text="Thêm mới"
+            android:paddingVertical="4dp"
+            android:textColor="@color/white"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
+</RelativeLayout>

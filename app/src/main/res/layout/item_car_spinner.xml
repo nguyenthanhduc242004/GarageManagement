@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/carInformationWrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/tvSpinnerCarState"
+        android:orientation="vertical"
+        android:paddingVertical="6dp"
+        android:paddingStart="8dp">
+
+        <TextView
+            android:id="@+id/tvLicensePlateAndCarBrand"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textStyle="bold"
+            android:text="78F1-00.146 - Honda"
+            android:textColor="@color/textColor" />
+
+        <TextView
+            android:id="@+id/tvOwnerNameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nguyễn Thành Đức"
+            android:textColor="@color/textColor" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvSpinnerCarState"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@drawable/round_background"
+        android:backgroundTint="@color/green"
+        android:textSize="10sp"
+        android:paddingVertical="2dp"
+        android:layout_marginHorizontal="12dp"
+        android:text="Đang sửa chữa" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/carInformationWrapper"
+        android:background="@android:color/darker_gray"/>
+</RelativeLayout>

@@ -1,5 +1,6 @@
 package com.example.garagemanagement.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.SearchView;
@@ -12,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.garagemanagement.CarDetailActivity;
+import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.R;
-import com.example.garagemanagement.adapter.CarDetailAdapter;
+import com.example.garagemanagement.adapter.CarAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,14 +29,14 @@ import java.util.List;
  * Use the {@link FragmentCars#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentCars extends Fragment {
+public class FragmentCars extends Fragment implements RecyclerViewInterface {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     List<Car> cars;
-    CarDetailAdapter carDetailAdapter;
+    CarAdapter carAdapter;
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
     // TODO: Rename and change types of parameters
@@ -89,28 +92,28 @@ public class FragmentCars extends Fragment {
 
 
 //        CarDetailRecyclerView
-        carDetailAdapter = new CarDetailAdapter();
+        carAdapter = new CarAdapter(getContext(),CarAdapter.TYPE_CAR_LIST, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-        RecyclerView recyclerViewCarDetails = view.findViewById(R.id.recyclerViewCarDetails);
-        recyclerViewCarDetails.setLayoutManager(linearLayoutManager);
-        recyclerViewCarDetails.setFocusable(false);
-        carDetailAdapter.setData(cars);
-        recyclerViewCarDetails.setAdapter(carDetailAdapter);
+        RecyclerView recyclerViewCarList = view.findViewById(R.id.recyclerViewCarList);
+        recyclerViewCarList.setLayoutManager(linearLayoutManager);
+        recyclerViewCarList.setFocusable(false);
+        carAdapter.setData(cars);
+        recyclerViewCarList.setAdapter(carAdapter);
 
 
 //        DividerItemDeconration
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewCarDetails.getContext(), RecyclerView.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewCarList.getContext(), RecyclerView.VERTICAL);
         dividerItemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
-        recyclerViewCarDetails.addItemDecoration(dividerItemDecoration);
+        recyclerViewCarList.addItemDecoration(dividerItemDecoration);
 
 //        SearchView
         SearchView searchView = view.findViewById(R.id.searchView);
         searchView.setIconified(false);
 
-//        Has to fakeNotifyDataSetChanged() because the keyboard abnormally disappear after first notifyDataSetChange()
+//        Has to fake notifyDataSetChanged() because the keyboard abnormally disappear after first notifyDataSetChange()
         new android.os.Handler().postDelayed(new Runnable() {
             public void run() {
-                carDetailAdapter.fakeNotifyDataSetChanged();
+                carAdapter.notifyDataSetChanged();
             }
         }, 1);
 
@@ -143,6 +146,22 @@ public class FragmentCars extends Fragment {
                 filteredList.add(car);
             }
         }
-        carDetailAdapter.setData(filteredList);
+        carAdapter.setData(filteredList);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent intent = new Intent(getContext(), CarDetailActivity.class);
+
+        intent.putExtra("LICENSE_PLATE", cars.get(position).getLicensePlate());
+        intent.putExtra("CAR_BRAND", cars.get(position).getCarBrand());
+        intent.putExtra("OWNER_NAME", cars.get(position).getOwnerName());
+        intent.putExtra("PHONE_NUMBER", cars.get(position).getPhoneNumber());
+        intent.putExtra("ADDRESS", cars.get(position).getAddress());
+        intent.putExtra("RECEIVE_DATE", formatter.format(cars.get(position).getReceiveDate()));
+        intent.putExtra("CAR_IMAGE", cars.get(position).getCarImage());
+        intent.putExtra("STATE", cars.get(position).getState());
+
+        startActivity(intent);
     }
 }

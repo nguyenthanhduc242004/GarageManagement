@@ -30,7 +30,6 @@
                     android:src="@drawable/tiep_nhan_xe" />
 
                 <TextView
-                    android:id="@+id/imageButtonAddRepairCard"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
@@ -58,6 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <ImageButton
+                    android:id="@+id/imageButtonAddRepairCard"
                     android:layout_width="match_parent"
                     android:layout_height="72dp"
                     android:alpha="0.4"
@@ -110,7 +110,7 @@
             android:paddingVertical="8dp"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:backgroundTint="#1473e6"
+            android:backgroundTint="@color/blue"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/recyclerViewNewCars"/>
 
@@ -145,7 +145,7 @@
             android:paddingVertical="8dp"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:backgroundTint="#1473e6"
+            android:backgroundTint="@color/blue"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/recyclerViewRepairingCars"/>
 
@@ -180,7 +180,7 @@
             android:paddingVertical="8dp"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:backgroundTint="#1473e6"
+            android:backgroundTint="@color/blue"
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/recyclerViewCompletedCars"/>
 

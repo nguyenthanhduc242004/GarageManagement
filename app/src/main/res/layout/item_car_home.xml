@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/ivCarImage"
             android:layout_width="match_parent"
             android:layout_height="120dp"
             android:src="@drawable/car_image_1"
@@ -24,17 +24,26 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/imageView"
+            android:layout_below="@+id/ivCarImage"
             android:orientation="vertical"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
             android:background="#f2f2f2">
 
             <TextView
-                android:id="@+id/tvCar"
+                android:id="@+id/tvLicensePlate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Honda - 78SH-000128"
+                android:text="78SH-000128"
+                android:textColor="#292929"
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvCarBrand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Honda"
                 android:textColor="#292929"
                 android:textStyle="bold"
                 android:textSize="18sp" />
@@ -46,21 +55,24 @@
                 android:textSize="16sp"
                 android:lines="2"
                 android:ellipsize="end"
-                android:textColor="#333"
+                android:textColor="@color/textColor"
                 android:text="Nguyễn Thành Đức" />
 
-            <TextView
-                android:id="@+id/tvPhone"
-                android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/homeCarUpperButton"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="#333"
-                android:text="0345967735"
+                android:backgroundTint="@color/green"
+                android:text="Thanh Toán"
+                android:textColor="@color/white"
+                android:paddingStart="12dp"
                 android:paddingVertical="4dp"
-                app:drawableStartCompat="@drawable/baseline_phone_24"
-                android:drawablePadding="4dp"/>
+                android:layout_gravity="center_horizontal"
+                android:drawableLeft="@drawable/baseline_check_24"
+                android:textSize="13sp"/>
 
             <Button
+                android:id="@+id/homeCarLowerButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/green"
