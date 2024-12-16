@@ -3,17 +3,22 @@ package com.example.garagemanagement.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
-import com.example.garagemanagement.CarDetailActivity;
+import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.R;
@@ -38,6 +43,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
     List<Car> cars;
     CarAdapter carAdapter;
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    Button btnCarState;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -81,14 +87,21 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         View view = inflater.inflate(R.layout.fragment_cars, container, false);
 
         //        Fake call API
-        Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 1);
-        Car car2 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Aston Martin", "TPHCM", "0123456789", new Date(), 0, 1);
+        Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "Mini", "0123456789", new Date(), 0, 1);
+        Car car2 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Aston Martin", "Sedan", "0123456789", new Date(), 0, 1);
         Car car3 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Volkswagenasdasdasd asd", "TPHCM", "0123456789", new Date(), 0, 2);
-        Car car4 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "TPHCM", "0123456789", new Date(), 0, 0);
-        Car car5 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "TPHCM", "0123456789", new Date(), 0, 0);
-        Car car6 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "TPHCM", "0123456789", new Date(), 0, 0);
+        Car car4 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "SUV", "0123456789", new Date(), 0, 0);
+        Car car5 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
+        Car car6 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Mini", "0123456789", new Date(), 0, 0);
+        Car car7 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "SUV", "0123456789", new Date(), 0, 0);
+        Car car8 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
+        Car car9 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
+        Car car10 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
+        Car car11 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "SUV", "0123456789", new Date(), 0, 0);
+        Car car12 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Luxury", "0123456789", new Date(), 0, 0);
+        Car car13 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Mni", "0123456789", new Date(), 0, 0);
 
-        cars = List.of(car1, car2, car3, car4, car5, car6);
+        cars = List.of(car1, car2, car3, car4, car5, car6, car7, car8, car9, car10, car11, car12, car13);
 
 
 //        CarDetailRecyclerView
@@ -101,10 +114,10 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         recyclerViewCarList.setAdapter(carAdapter);
 
 
-//        DividerItemDeconration
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewCarList.getContext(), RecyclerView.VERTICAL);
-        dividerItemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
-        recyclerViewCarList.addItemDecoration(dividerItemDecoration);
+//        DividerItemDecoration
+//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerViewCarList.getContext(), RecyclerView.VERTICAL);
+//        dividerItemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
+//        recyclerViewCarList.addItemDecoration(dividerItemDecoration);
 
 //        SearchView
         SearchView searchView = view.findViewById(R.id.searchView);
@@ -130,6 +143,15 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             }
         });
 
+        btnCarState = view.findViewById(R.id.btnCarState);
+        registerForContextMenu(btnCarState);
+        btnCarState.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().openContextMenu(btnCarState);
+            }
+        });
+
         return view;
     }
 
@@ -151,17 +173,50 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
 
     @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(getContext(), CarDetailActivity.class);
+        Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
 
         intent.putExtra("LICENSE_PLATE", cars.get(position).getLicensePlate());
         intent.putExtra("CAR_BRAND", cars.get(position).getCarBrand());
         intent.putExtra("OWNER_NAME", cars.get(position).getOwnerName());
         intent.putExtra("PHONE_NUMBER", cars.get(position).getPhoneNumber());
-        intent.putExtra("ADDRESS", cars.get(position).getAddress());
+        intent.putExtra("CAR_TYPE", cars.get(position).getCarType());
         intent.putExtra("RECEIVE_DATE", formatter.format(cars.get(position).getReceiveDate()));
         intent.putExtra("CAR_IMAGE", cars.get(position).getCarImage());
         intent.putExtra("STATE", cars.get(position).getState());
 
         startActivity(intent);
+    }
+
+    @Override
+    public void onItemClick(int position, int state) {
+
+    }
+
+    @Override
+    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        if (v.getId() == R.id.btnCarState) {
+            getActivity().getMenuInflater().inflate(R.menu.menu_car_state, menu);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.optionAll) {
+            btnCarState.setText("Tất cả");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
+        }
+        else if (itemId == R.id.optionNew) {
+            btnCarState.setText("Mới tiếp nhận");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        } else if (itemId == R.id.optionRepairing) {
+            btnCarState.setText("Đang sửa");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
+        } else if (itemId == R.id.optionCompleted) {
+            btnCarState.setText("Mới hoàn thành");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        }
+        return super.onContextItemSelected(item);
     }
 }

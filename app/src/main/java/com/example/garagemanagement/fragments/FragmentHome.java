@@ -14,13 +14,15 @@ import android.widget.ImageButton;
 
 import com.example.garagemanagement.AddCarActivity;
 import com.example.garagemanagement.AddRepairCardActivity;
-import com.example.garagemanagement.CarDetailActivity;
+import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.R;
+import com.example.garagemanagement.RepairingCarDetailActivity;
 import com.example.garagemanagement.adapter.CarAdapter;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +44,9 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 
     List<Car> cars;
+    List<Car> newCars = new ArrayList<>();
+    List<Car> repairingCars = new ArrayList<>();
+    List<Car> completedCars = new ArrayList<>();
 
     public FragmentHome() {
         // Required empty public constructor
@@ -98,14 +103,32 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             }
         });
 
+
+
 //        Fake call API
-        Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 1);
-        Car car2 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 1);
-        Car car3 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 2);
-        Car car4 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 0);
-        Car car5 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 0);
-        Car car6 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 0);
+        Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "Mini", "0123456789", new Date(), 0, 1);
+        Car car2 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Sedan", "0123456789", new Date(), 0, 1);
+        Car car3 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "SUV", "0123456789", new Date(), 0, 2);
+        Car car4 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Luxury", "0123456789", new Date(), 0, 0);
+        Car car5 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Luxury", "0123456789", new Date(), 0, 1);
+        Car car6 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
         cars = List.of(car1, car2, car3, car4, car5, car6);
+
+        newCars = new ArrayList<>();
+        repairingCars = new ArrayList<>();
+        completedCars = new ArrayList<>();
+
+        for (int i = 0; i < cars.size(); i++) {
+            Car car = cars.get(i);
+            int state = car.getState();
+            if (state == 0) {
+                newCars.add(car);
+            } else if (state == 1) {
+                repairingCars.add(car);
+            } else if (state == 2) {
+                completedCars.add(car);
+            }
+        }
 
 //        New Car RecyclerView:
         CarAdapter newCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
@@ -114,7 +137,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         recyclerViewNewCars.setLayoutManager(gridLayoutManager1);
         recyclerViewNewCars.setFocusable(false);
         recyclerViewNewCars.setNestedScrollingEnabled(false);
-        newCarsAdapter.setData(cars);
+        newCarsAdapter.setData(newCars);
         recyclerViewNewCars.setAdapter(newCarsAdapter);
 
 //        Repairing Car RecyclerView:
@@ -124,7 +147,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         recyclerViewRepairingCars.setLayoutManager(gridLayoutManager2);
         recyclerViewRepairingCars.setFocusable(false);
         recyclerViewRepairingCars.setNestedScrollingEnabled(false);
-        repairingCarsAdapter.setData(cars);
+        repairingCarsAdapter.setData(repairingCars);
         recyclerViewRepairingCars.setAdapter(repairingCarsAdapter);
 
 //        Completed Car RecyclerView:
@@ -134,7 +157,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         recyclerViewCompletedCars.setLayoutManager(gridLayoutManager3);
         recyclerViewCompletedCars.setFocusable(false);
         recyclerViewCompletedCars.setNestedScrollingEnabled(false);
-        completedCarsAdapter.setData(cars);
+        completedCarsAdapter.setData(completedCars);
         recyclerViewCompletedCars.setAdapter(completedCarsAdapter);
 
         return view;
@@ -142,17 +165,38 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
 
     @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(getContext(), CarDetailActivity.class);
 
-        intent.putExtra("LICENSE_PLATE", cars.get(position).getLicensePlate());
-        intent.putExtra("CAR_BRAND", cars.get(position).getCarBrand());
-        intent.putExtra("OWNER_NAME", cars.get(position).getOwnerName());
-        intent.putExtra("PHONE_NUMBER", cars.get(position).getPhoneNumber());
-        intent.putExtra("ADDRESS", cars.get(position).getAddress());
-        intent.putExtra("RECEIVE_DATE", formatter.format(cars.get(position).getReceiveDate()));
-        intent.putExtra("CAR_IMAGE", cars.get(position).getCarImage());
-        intent.putExtra("STATE", cars.get(position).getState());
+    }
 
-        startActivity(intent);
+    @Override
+    public void onItemClick(int position, int state) {
+        if (state == 0) {
+            Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
+            intent.putExtra("LICENSE_PLATE", newCars.get(position).getLicensePlate());
+            intent.putExtra("CAR_BRAND", newCars.get(position).getCarBrand());
+            intent.putExtra("OWNER_NAME", newCars.get(position).getOwnerName());
+            intent.putExtra("PHONE_NUMBER", newCars.get(position).getPhoneNumber());
+            intent.putExtra("CAR_TYPE", newCars.get(position).getCarType());
+            intent.putExtra("RECEIVE_DATE", formatter.format(newCars.get(position).getReceiveDate()));
+            intent.putExtra("CAR_IMAGE", newCars.get(position).getCarImage());
+            intent.putExtra("STATE", newCars.get(position).getState());
+            startActivity(intent);
+        }
+        else if (state == 1) {
+            Intent intent = new Intent(getContext(), RepairingCarDetailActivity.class);
+            intent.putExtra("LICENSE_PLATE", repairingCars.get(position).getLicensePlate());
+            intent.putExtra("CAR_BRAND", repairingCars.get(position).getCarBrand());
+            intent.putExtra("OWNER_NAME", repairingCars.get(position).getOwnerName());
+            intent.putExtra("PHONE_NUMBER", repairingCars.get(position).getPhoneNumber());
+            intent.putExtra("CARTYPE", repairingCars.get(position).getCarType());
+            intent.putExtra("RECEIVE_DATE", formatter.format(repairingCars.get(position).getReceiveDate()));
+            intent.putExtra("CAR_IMAGE", repairingCars.get(position).getCarImage());
+            intent.putExtra("STATE", repairingCars.get(position).getState());
+            intent.putExtra("CAR_SERVICES", repairingCars.get(position).getCarServices());
+            intent.putExtra("CAR_SUPPLIES", repairingCars.get(position).getCarSupplies());
+            startActivity(intent);
+        }
+
+
     }
 }

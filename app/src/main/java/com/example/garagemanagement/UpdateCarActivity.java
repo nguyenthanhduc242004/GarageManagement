@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -23,6 +24,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.garagemanagement.adapter.CarBrandSpinnerAdapter;
+import com.example.garagemanagement.adapter.CarTypeSpinnerAdapter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,20 +62,19 @@ public class UpdateCarActivity extends AppCompatActivity {
         String carBrand = getIntent().getStringExtra("CAR_BRAND");
         String ownerName = getIntent().getStringExtra("OWNER_NAME");
         String phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
-        String address = getIntent().getStringExtra("ADDRESS");
+        String carType = getIntent().getStringExtra("CARTYPE");
         String receiveDate = getIntent().getStringExtra("RECEIVE_DATE");
         int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
 
-        EditText etLicensePlate = findViewById(R.id.etLicensePlate);
+        TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
         EditText etOwnerName = findViewById(R.id.etOwnerName);
         EditText etPhoneNumber = findViewById(R.id.etPhoneNumber);
-        EditText etAddress = findViewById(R.id.etAddress);
 
-        etLicensePlate.setText(licensePlate);
+        tvLicensePlate.setVisibility(View.VISIBLE);
+        tvLicensePlate.setText(licensePlate);
 //        spinnerCarBrand.setSel
         etOwnerName.setText(ownerName);
         etPhoneNumber.setText(phoneNumber);
-        etAddress.setText(address);
 
 
 //        CAR BRAND SPINNER:
@@ -87,6 +88,7 @@ public class UpdateCarActivity extends AppCompatActivity {
 
         CarBrandSpinnerAdapter carBrandSpinnerAdapter = new CarBrandSpinnerAdapter(this, R.layout.item_car_brand_selected, carBrands);
         spinnerCarBrand.setAdapter(carBrandSpinnerAdapter);
+        spinnerCarBrand.setSelection(carBrands.indexOf(carBrand));
         spinnerCarBrand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -98,6 +100,32 @@ public class UpdateCarActivity extends AppCompatActivity {
 
             }
         });
+
+
+//        CAR BRAND SPINNER:
+        Spinner spinnerCarType = findViewById(R.id.spinnerCarType);
+
+        // Fake call API:
+        List<String> carTypes = new ArrayList<>();
+        carTypes.add("Mini");
+        carTypes.add("Sedan");
+        carTypes.add("SUV");
+        carTypes.add("Luxury");
+
+        CarTypeSpinnerAdapter carTypeSpinnerAdapter = new CarTypeSpinnerAdapter(this, R.layout.item_car_type_selected, carTypes);
+        spinnerCarType.setAdapter(carTypeSpinnerAdapter);
+        spinnerCarType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
 
 //        DATE PICKER:
         buttonDate = findViewById(R.id.buttonDate);

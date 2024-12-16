@@ -173,16 +173,17 @@
         <Button
             android:id="@+id/btnShowAllCompletedCars"
             android:layout_width="match_parent"
-            android:layout_marginHorizontal="28dp"
             android:layout_height="wrap_content"
-            android:text="Xem Tất Cả"
-            android:layout_marginTop="12dp"
-            android:paddingVertical="8dp"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:backgroundTint="@color/blue"
+            android:layout_below="@+id/recyclerViewCompletedCars"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/recyclerViewCompletedCars"/>
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="80dp"
+            android:backgroundTint="@color/blue"
+            android:paddingVertical="8dp"
+            android:text="Xem Tất Cả"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
     </RelativeLayout>
 </androidx.core.widget.NestedScrollView>

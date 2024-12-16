@@ -5,11 +5,10 @@ import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -26,15 +25,13 @@ import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.Objects.CarService;
 import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.adapter.CarServiceAdapter;
-import com.example.garagemanagement.adapter.CarSpinnerAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class AddRepairCardActivity extends AppCompatActivity implements RecyclerViewInterface, CustomCarSupplyDialog.CustomCarSupplyDialogInterface {
+public class RepairingCarDetailActivity extends AppCompatActivity implements RecyclerViewInterface, CustomCarSupplyDialog.CustomCarSupplyDialogInterface {
     Car currentCar;
     SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
     NumberFormat currencyFormatter = new DecimalFormat("#,###");
@@ -54,22 +51,15 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        selectedCarSupplies = new ArrayList<>();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_add_repair_card);
+        setContentView(R.layout.activity_repairing_car_detail);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
 
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
 
@@ -82,50 +72,52 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
             }
         });
 
-        //        BASIC INFORMATION:
+//        BASIC CAR INFORMATION:
+        String licensePlate = getIntent().getStringExtra("LICENSE_PLATE");
+        String carBrand = getIntent().getStringExtra("CAR_BRAND");
+        String ownerName = getIntent().getStringExtra("OWNER_NAME");
+        String phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
+        String carType = getIntent().getStringExtra("CAR_TYPE");
+        String receiveDate = getIntent().getStringExtra("RECEIVE_DATE");
+        int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
+        String[] carServiceArray = getIntent().getStringArrayExtra("CAR_SERVICES");
+        String[] carSupplyArray = getIntent().getStringArrayExtra("CAR_SUPPLIES");
+
+//        TODO: USE SERIALIZABLE INSTEAD OF STRING[] => WORK WITH BACKEND
+//        GET SELECTED CAR SUPPLY DATA:
+        // FAKE CALL API SUPPLY LIST:
+//        CarSupply carSupply1 = new CarSupply("1", "Dung dịch phụ gia súc béc xăng (Wurth)", 300000);
+//        CarSupply carSupply2 = new CarSupply("2", "Dung dịch phụ gia súc nhớt (Wurth)", 300000);
+//        CarSupply carSupply3 = new CarSupply("3", "Dung dịch vệ sinh kim phun (Wurth)", 350000);
+//        CarSupply carSupply4 = new CarSupply("4", "Nước làm mát (Asin, Jinco)", 150000);
+//        CarSupply carSupply5 = new CarSupply("5", "Còi Denso", 500000);
+//        CarSupply carSupply6 = new CarSupply("6", "Gạt mưa Bosch cứng", 350000);
+//        CarSupply carSupply7 = new CarSupply("7", "Gạt mưa Bosch mềm", 600000);
+//        List<CarSupply> carSupplies = List.of(carSupply1, carSupply2, carSupply3, carSupply4, carSupply5, carSupply6, carSupply7);
+//        for (int i = 0; i < carSupplies.size(); i++) {
+//            if (carSupplies.get(i).getSupplyId().equals())
+//        }
+
         TextView tvOwnerName = findViewById(R.id.tvOwnerName);
         TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
         TextView tvCarBrand = findViewById(R.id.tvCarBrand);
         TextView tvPhoneNumber = findViewById(R.id.tvPhoneNumber);
         TextView tvCarType = findViewById(R.id.tvCarType);
         TextView tvReceiveDate = findViewById(R.id.tvReceiveDate);
+        ImageView ivCarImage = findViewById(R.id.ivCarImage);
 
-        //        CAR BRAND SPINNER:
-        Spinner spinner = findViewById(R.id.spinner);
-
-        // Fake call API:
-        List<Car> unpaidCars = new ArrayList<>();
-        unpaidCars.add(new Car("Nguyễn Thành Đức", "78SH-000126", "Honda", "TPHCM", "0123456789", new Date(), 0, 0));
-        unpaidCars.add(new Car("Nguyễn Thành Đức Đức ĐứcĐức ĐứcĐức ĐứcĐức ĐứcĐức ĐứcĐức", "78SH-000129", "Honda", "TPHCM", "0123456789", new Date(), 0, 1));
-        unpaidCars.add(new Car("Nguyễn Thành Đức", "78SH-000127", "Honda", "TPHCM", "0123456789", new Date(), 0, 2));
-        unpaidCars.add(new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 3));
-
-//        CAR SPINNER:
-        CarSpinnerAdapter carSpinnerAdapter = new CarSpinnerAdapter(this, R.layout.item_car_brand_selected, unpaidCars);
-        spinner.setAdapter(carSpinnerAdapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                currentCar = (Car) adapterView.getItemAtPosition(i);
-                if (currentCar.getLicensePlate() != tvLicensePlate.getText()) {
-                    tvOwnerName.setText(currentCar.getOwnerName());
-                    tvLicensePlate.setText(currentCar.getLicensePlate());
-                    tvCarBrand.setText(currentCar.getCarBrand());
-                    tvPhoneNumber.setText(currentCar.getPhoneNumber());
-                    tvCarType.setText(currentCar.getCarType());
-                    tvReceiveDate.setText(dateFormatter.format(currentCar.getReceiveDate()));
-                    carServiceAdapter.setData(new ArrayList<>());
-                    totalCarServicePrice.setText("Tổng: 0đ");
-
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
+        ivCarImage.setImageResource(carImage);
+        tvOwnerName.setText(ownerName);
+        tvLicensePlate.setText(licensePlate);
+        tvCarBrand.setText(carBrand);
+        tvPhoneNumber.setText(phoneNumber);
+        tvCarType.setText(carType);
+        tvReceiveDate.setText(receiveDate);
+        if (carImage == 0) {
+            ivCarImage.setImageResource(R.drawable.no_image);
+        } else {
+            ivCarImage.setImageResource(carImage);
+        }
 
 //        TOGGLE CAR INFORMATION BUTTON:
         LinearLayout carDetailWrapper = findViewById(R.id.car_detail_wrapper);
@@ -141,9 +133,9 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
                     toggleCarInformationButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_right_24, 0, 0, 0);
                 }
             }
-        });
 
-//        TOGGLE CAR SERVICE LIST BUTTON:
+        });
+        //        TOGGLE CAR SERVICE LIST BUTTON:
         LinearLayout carServiceWrapper = findViewById(R.id.car_service_wrapper);
         Button toggleCarServicesButton = findViewById(R.id.toggleCarServicesButton);
         toggleCarServicesButton.setOnClickListener(new View.OnClickListener() {
@@ -197,7 +189,7 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
             @Override
             public void onClick(View view) {
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(AddRepairCardActivity.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(RepairingCarDetailActivity.this);
                 builder.setTitle("Chọn Dịch Vụ");
                 builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
@@ -225,9 +217,9 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
                             }
                         }
                         carServiceAdapter.setData(selectedCarServices);
-                        totalCarServicePrice.setText("Tổng: " + currencyFormatter.format(totalPrice) + "đ");
+                        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalPrice)));
                         totalCarServicePriceLong = totalPrice;
-                        tvTotalPrice.setText("Tổng tiền: " + currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong) + "đ");
+                        tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
                     }
                 });
 
@@ -265,7 +257,7 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
 
 //        ADD CAR SUPPLY BUTTON:
 
-//        CarSupplyAdapter
+//        CarServiceAdapter
         carSupplyAdapter = new CarSupplyAdapter(getApplicationContext(), CarSupplyAdapter.TYPE_LIST, this);
         RecyclerView recyclerViewCarSupplyList = findViewById(R.id.recyclerViewCarSupplyList);
         LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(getApplicationContext());
@@ -284,8 +276,6 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
             }
         });
     }
-
-
 
     @Override
     public void onItemClick(int position) {

@@ -1,6 +1,8 @@
 package com.example.garagemanagement.Objects;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Car {
     public static final int STATE_NEW = 0;
@@ -10,17 +12,19 @@ public class Car {
     private String ownerName;
     private String licensePlate;
     private String carBrand;
-    private String address;
+    private String carType;
     private String phoneNumber;
     private Date receiveDate;
     private int carImage;
     private int state;
+    private String[] carServices;
+    private String[] carSupplies;
 
-    public Car(String ownerName, String licensePlate, String carBrand, String address, String phoneNumber, Date receiveDate, int carImage, int state) {
+    public Car(String ownerName, String licensePlate, String carBrand, String carType, String phoneNumber, Date receiveDate, int carImage, int state) {
         this.ownerName = ownerName;
         this.licensePlate = licensePlate;
         this.carBrand = carBrand;
-        this.address = address;
+        this.carType = carType;
         this.phoneNumber = phoneNumber;
         this.receiveDate = receiveDate;
         this.carImage = carImage;
@@ -51,12 +55,12 @@ public class Car {
         this.carBrand = carBrand;
     }
 
-    public String getAddress() {
-        return address;
+    public String getCarType() {
+        return carType;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setCarType(String carType) {
+        this.carType = carType;
     }
 
     public String getPhoneNumber() {
@@ -89,5 +93,21 @@ public class Car {
 
     public void setState(int state) {
         this.state = state;
+    }
+
+    public String[] getCarServices() {
+        return carServices;
+    }
+
+    public void setCarServices(String[] carServices) {
+        this.carServices = carServices;
+    }
+
+    public String[] getCarSupplies() {
+        return carSupplies;
+    }
+
+    public void setCarSupplies(String[] carSupplies) {
+        this.carSupplies = carSupplies;
     }
 }

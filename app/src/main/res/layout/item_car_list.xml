@@ -3,8 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="4dp">
+    android:paddingHorizontal="4dp"
+    android:paddingVertical="8dp"
+    android:background="@drawable/square_border">
 
     <TextView
         android:id="@+id/tvOwnerName"
@@ -15,7 +16,7 @@
         android:textColor="#666"
         android:layout_weight="1"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:layout_gravity="center_vertical"/>
     <TextView
         android:id="@+id/tvLicensePlate"
@@ -26,7 +27,7 @@
         android:textColor="#666"
         android:layout_weight="1"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:layout_gravity="center_vertical"/>
     <TextView
         android:id="@+id/tvCarBrand"
@@ -37,7 +38,7 @@
         android:textColor="#666"
         android:layout_weight="1"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:layout_gravity="center_vertical"/>
     <TextView
         android:id="@+id/tvReceiveDate"
@@ -48,6 +49,6 @@
         android:textColor="#666"
         android:layout_weight="1"
         android:gravity="center"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:layout_gravity="center_vertical"/>
 </LinearLayout>

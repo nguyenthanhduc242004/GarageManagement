@@ -10,9 +10,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -22,6 +24,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.garagemanagement.adapter.CarBrandSpinnerAdapter;
+import com.example.garagemanagement.adapter.CarTypeSpinnerAdapter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,6 +47,12 @@ public class AddCarActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+//        SET VISIBILITY FOR etLicensePlate
+        EditText etLicensePlate = findViewById(R.id.etLicensePlate);
+        etLicensePlate.setVisibility(View.VISIBLE);
+        TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
+        tvLicensePlate.setVisibility(View.GONE);
 
 //        BACK BUTTON:
         ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
@@ -70,6 +79,30 @@ public class AddCarActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 //                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+//          CAR TYPE SPINNER:
+        Spinner spinnerCarType = findViewById(R.id.spinnerCarType);
+
+        // Fake call API:
+        List<String> carTypes = new ArrayList<>();
+        carTypes.add("Mini");
+        carTypes.add("Sedan");
+        carTypes.add("SUV");
+        carTypes.add("Luxury");
+
+        CarTypeSpinnerAdapter carTypeSpinnerAdapter = new CarTypeSpinnerAdapter(this, R.layout.item_car_type_selected, carTypes);
+        spinnerCarType.setAdapter(carTypeSpinnerAdapter);
+        spinnerCarType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        //                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
             }
 
             @Override

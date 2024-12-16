@@ -1,6 +1,7 @@
 package com.example.garagemanagement.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,6 +66,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         if (car == null) {
             return;
         }
+        holder.state = car.getState();
         holder.tvLicensePlate.setText(car.getLicensePlate());
         holder.tvCarBrand.setText(car.getCarBrand());
         holder.tvOwnerName.setText(car.getOwnerName());
@@ -124,6 +126,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         private TextView tvReceiveDate;
         private Button homeCarUpperButton;
         private Button homeCarLowerButton;
+        private int state;
 
         public CarViewHolder(View itemView) {
             super(itemView);
@@ -135,17 +138,33 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
             homeCarUpperButton = itemView.findViewById(R.id.homeCarUpperButton);
             homeCarLowerButton = itemView.findViewById(R.id.homeCarLowerButton);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (recyclerViewInterface != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            recyclerViewInterface.onItemClick(position);
+            if (type == TYPE_CAR_HOME) {
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (recyclerViewInterface != null) {
+                            int position = getAdapterPosition();
+                            if (position != RecyclerView.NO_POSITION) {
+                                recyclerViewInterface.onItemClick(position, state);
+                            }
                         }
                     }
-                }
-            });
+                });
+            } else if (type == TYPE_CAR_LIST) {
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (recyclerViewInterface != null) {
+                            int position = getAdapterPosition();
+                            if (position != RecyclerView.NO_POSITION) {
+                                Log.i("POSITION", String.valueOf(position));
+                                Log.i("STATESTATE", String.valueOf(state));
+                                recyclerViewInterface.onItemClick(position);
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
 }

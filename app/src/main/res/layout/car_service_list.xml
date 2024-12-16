@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Mã"
+            android:paddingHorizontal="2dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:background="@drawable/square_border"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Tên Dịch Vụ"
+            android:paddingHorizontal="2dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_weight="4"
+            android:textAlignment="center"
+            android:background="@drawable/square_border"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Giá (Luxury)"
+            android:paddingHorizontal="2dp"
+            android:textColor="@color/black"
+            android:layout_weight="2"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:background="@drawable/square_border"/>
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewCarServiceList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </androidx.recyclerview.widget.RecyclerView>
+</TableLayout>

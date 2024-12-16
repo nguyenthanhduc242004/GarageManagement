@@ -10,20 +10,17 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.example.garagemanagement.Objects.Car;
-
-public class CarDetailActivity extends AppCompatActivity {
+public class NewCarDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_car_detail);
+        setContentView(R.layout.activity_new_car_detail);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -43,7 +40,7 @@ public class CarDetailActivity extends AppCompatActivity {
         String carBrand = getIntent().getStringExtra("CAR_BRAND");
         String ownerName = getIntent().getStringExtra("OWNER_NAME");
         String phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
-        String address = getIntent().getStringExtra("ADDRESS");
+        String carType = getIntent().getStringExtra("CARTYPE");
         String receiveDate = getIntent().getStringExtra("RECEIVE_DATE");
         int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
 
@@ -51,7 +48,7 @@ public class CarDetailActivity extends AppCompatActivity {
         TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
         TextView tvCarBrand = findViewById(R.id.tvCarBrand);
         TextView tvPhoneNumber = findViewById(R.id.tvPhoneNumber);
-        TextView tvAddress = findViewById(R.id.tvAddress);
+        TextView tvCarType = findViewById(R.id.tvCarType);
         TextView tvReceiveDate = findViewById(R.id.tvReceiveDate);
         ImageView ivCarImage = findViewById(R.id.ivCarImage);
 
@@ -60,41 +57,12 @@ public class CarDetailActivity extends AppCompatActivity {
         tvLicensePlate.setText(licensePlate);
         tvCarBrand.setText(carBrand);
         tvPhoneNumber.setText(phoneNumber);
-        tvAddress.setText(address);
+        tvCarType.setText(carType);
         tvReceiveDate.setText(receiveDate);
         if (carImage == 0) {
             ivCarImage.setImageResource(R.drawable.no_image);
         } else {
             ivCarImage.setImageResource(carImage);
-        }
-
-//        FOOTER BUTTONS:
-        Button footerButtonRight = findViewById(R.id.footerButtonRight);
-        Button footerButtonLeft = findViewById(R.id.footerButtonLeft);
-        int state = getIntent().getIntExtra("STATE", -1);
-        if (state == Car.STATE_NEW) {
-            footerButtonRight.setText("Sửa Chữa");
-            footerButtonLeft.setText("Xóa");
-            footerButtonRight.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green));
-            footerButtonLeft.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.red));
-            footerButtonRight.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_home_repair_service_24, 0, 0, 0);
-            footerButtonLeft.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_delete_outline_24, 0, 0, 0);
-        }
-        else if (state == Car.STATE_REPAIRING) {
-            footerButtonRight.setText("Sửa Xong");
-            footerButtonLeft.setText("Sửa Thêm");
-            footerButtonRight.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green));
-            footerButtonLeft.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.yellow));
-            footerButtonRight.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_check_24, 0, 0, 0);
-            footerButtonLeft.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_add_24, 0, 0, 0);
-        }
-        else if (state == Car.STATE_COMPLETED) {
-            footerButtonRight.setText("Thanh Toán");
-            footerButtonLeft.setText("Sửa Thêm");
-            footerButtonRight.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.green));
-            footerButtonLeft.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.yellow));
-            footerButtonRight.setCompoundDrawablesWithIntrinsicBounds(R.drawable.outline_payment_24, 0, 0, 0);
-            footerButtonLeft.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_add_24, 0, 0, 0);
         }
 
 
@@ -103,15 +71,15 @@ public class CarDetailActivity extends AppCompatActivity {
         buttonUpdateCar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(CarDetailActivity.this, UpdateCarActivity.class);
+                Intent intent = new Intent(NewCarDetailActivity.this, UpdateCarActivity.class);
                 intent.putExtra("LICENSE_PLATE", licensePlate);
                 intent.putExtra("CAR_BRAND", carBrand);
                 intent.putExtra("OWNER_NAME", ownerName);
                 intent.putExtra("PHONE_NUMBER", phoneNumber);
-                intent.putExtra("ADDRESS", address);
+                intent.putExtra("CARTYPE", carType);
                 intent.putExtra("RECEIVE_DATE", receiveDate);
                 intent.putExtra("CAR_IMAGE", carImage);
-                intent.putExtra("STATE", state);
+//                intent.putExtra("STATE", state);
 
                 startActivity(intent);
             }
