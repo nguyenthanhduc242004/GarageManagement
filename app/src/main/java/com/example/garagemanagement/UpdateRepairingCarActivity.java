@@ -64,6 +64,10 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
     long totalCarSupplyPriceLong = 0;
     TextView tvTotalPrice;
 
+    public static List<CarSupply> selectedCarSupplies = new ArrayList<>();
+
+    androidx.appcompat.app.AlertDialog alertDialog;
+
     public void openCarSupplyDialog(View view) {
         CustomCarSupplyDialog customCarSupplyDialog = new CustomCarSupplyDialog();
         customCarSupplyDialog.show(getSupportFragmentManager(), "Chọn Vật Tư, Dung Dịch");
@@ -229,7 +233,7 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
         int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
         int state = getIntent().getIntExtra("STATE", -1);
         List<CarService> selectedCarServices = (List<CarService>) getIntent().getSerializableExtra("CAR_SERVICES");
-        List<CarSupply> selectedCarSupplies = (List<CarSupply>) getIntent().getSerializableExtra("CAR_SUPPLIES");
+        selectedCarSupplies = (List<CarSupply>) getIntent().getSerializableExtra("CAR_SUPPLIES");
 
         EditText etLicensePlate = findViewById(R.id.etLicensePlate);
         Spinner spinnerCarBrand = findViewById(R.id.spinnerCarBrand);
@@ -416,9 +420,18 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
         }
 
         boolean[] checkedServices = new boolean[allCarServices.size()];
+        boolean[] uncheckableServices = new boolean[allCarServices.size()];
         Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
-        addCarServiceButton = findViewById(R.id.addCarServiceButton);
         List<CarService> finalCarServices = allCarServices;
+        for (int i = 0; i < finalCarServices.size(); i++) {
+            for (int k = 0; k < selectedCarServices.size(); k++) {
+                if (finalCarServices.get(i).getServiceId().equals(selectedCarServices.get(k).getServiceId())) {
+                    checkedServices[i] = true;
+                    uncheckableServices[i] = true;
+                    break;
+                }
+            }
+        }
         addCarServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -429,7 +442,12 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
                     @Override
                     public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
                         // Update current focused item's checked status
-                        checkedServices[which] = isChecked;
+                        alertDialog.getListView().setItemChecked(which, uncheckableServices[which]);
+                        if (uncheckableServices[which]) {
+                            checkedServices[which] = true;
+                        } else {
+                            checkedServices[which] = isChecked;
+                        }
                         // Get the current focused item
                         // CarService currentItem = finalCarServices.get(which);
                         // Notify the current action
@@ -466,7 +484,7 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
                     }
                 });
 
-                androidx.appcompat.app.AlertDialog alertDialog = builder.create();
+                alertDialog = builder.create();
                 // Show alert dialog
                 alertDialog.show();
             }
@@ -551,7 +569,6 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
         totalCarSupplyPrice = findViewById(R.id.totalCarSupplyPrice);
         totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarSupplyPriceLong)));
         Button addCarSupplyButton = findViewById(R.id.addCarSupplyButton);
-        addCarSupplyButton = findViewById(R.id.addCarSupplyButton);
         addCarSupplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -611,6 +628,12 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
         totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalPrice)));
         totalCarSupplyPriceLong = totalPrice;
         tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
+    }
+
+    @Override
+    public void setCarSupplyAdapterData(List<CarSupply> carSupplies) {
+        carSupplyAdapter.setData(carSupplies);
+        UpdateRepairingCarActivity.selectedCarSupplies = carSupplies;
     }
 
     @Override

@@ -63,6 +63,8 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
     List<Car> filteredList = new ArrayList<>();
     int selectedState = -1;
 
+    SearchView searchView;
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -105,11 +107,18 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         View view = inflater.inflate(R.layout.fragment_cars, container, false);
 
 //        SEARCH VIEW
-        SearchView searchView = view.findViewById(R.id.searchView);
+        searchView = view.findViewById(R.id.searchView);
         searchView.setIconified(false);
         EditText txtSearch = ((EditText)searchView.findViewById(androidx.appcompat.R.id.search_src_text));
         txtSearch.setHintTextColor(Color.LTGRAY);
         txtSearch.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                searchView.setIconified(false);
+                return true;
+            }
+        });
         
         String json = "[\n" +
                 "  {\n" +
@@ -247,7 +256,17 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
                 unpaidCars.add(car);
             }
         }
-        filteredList = unpaidCars;
+
+        int selectedState = FragmentHome.selectedState;
+        if (selectedState == -1) {
+            filteredList = unpaidCars;
+        } else if (selectedState == 0) {
+            filteredList = newCars;
+        } else if (selectedState == 1) {
+            filteredList = repairingCars;
+        } else if (selectedState == 2) {
+            filteredList = completedCars;
+        }
 
 //        CarDetailRecyclerView
         carAdapter = new CarAdapter(getContext(),CarAdapter.TYPE_CAR_LIST, this);
@@ -255,7 +274,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         RecyclerView recyclerViewCarList = view.findViewById(R.id.recyclerViewCarList);
         recyclerViewCarList.setLayoutManager(linearLayoutManager);
         recyclerViewCarList.setFocusable(false);
-        carAdapter.setData(unpaidCars);
+        carAdapter.setData(filteredList);
         recyclerViewCarList.setAdapter(carAdapter);
 
 
@@ -293,8 +312,43 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
                 getActivity().openContextMenu(btnCarState);
             }
         });
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        int selectedState = FragmentHome.selectedState;
+        if (selectedState == -1) {
+            filteredList = unpaidCars;
+            searchView.setQuery("", false);
+        } else if (selectedState == 0) {
+            filteredList = newCars;
+            searchView.setQuery("", false);
+        } else if (selectedState == 1) {
+            filteredList = repairingCars;
+            searchView.setQuery("", false);
+        } else if (selectedState == 2) {
+            filteredList = completedCars;
+            searchView.setQuery("", false);
+        }
+        carAdapter.setData(filteredList);
+        if (selectedState == -1) {
+            btnCarState.setText("Chọn tình trạng");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
+        }
+        else if (selectedState == 0) {
+            btnCarState.setText("Mới tiếp nhận");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+        } else if (selectedState == 1) {
+            btnCarState.setText("Đang sửa");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
+        } else if (selectedState == 2) {
+            btnCarState.setText("Mới hoàn thành");
+            btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+        }
+
+        FragmentHome.selectedState = -1;
     }
 
     private void filterList(String text, int selectedState) {
@@ -379,6 +433,8 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             filteredList = unpaidCars;
             carAdapter.setData(filteredList);
             selectedState = -1;
+            searchView.setQuery("", false);
+            searchView.clearFocus();
         }
         else if (itemId == R.id.optionNew) {
             btnCarState.setText("Mới tiếp nhận");
@@ -386,18 +442,24 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             filteredList = newCars;
             carAdapter.setData(filteredList);
             selectedState = 0;
+            searchView.setQuery("", false);
+            searchView.clearFocus();
         } else if (itemId == R.id.optionRepairing) {
             btnCarState.setText("Đang sửa");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
             filteredList = repairingCars;
             carAdapter.setData(filteredList);
             selectedState = 1;
+            searchView.setQuery("", false);
+            searchView.clearFocus();
         } else if (itemId == R.id.optionCompleted) {
             btnCarState.setText("Mới hoàn thành");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
             filteredList = completedCars;
             carAdapter.setData(filteredList);
             selectedState = 2;
+            searchView.setQuery("", false);
+            searchView.clearFocus();
         }
         return super.onContextItemSelected(item);
     }

@@ -46,6 +46,8 @@ public class CustomCarSupplyDialog extends AppCompatDialogFragment implements Re
         List<CarSupply> selectedCarSupplies = new ArrayList<>();
         if (!AddRepairCardActivity.selectedCarSupplies.isEmpty()) {
             selectedCarSupplies = AddRepairCardActivity.selectedCarSupplies;
+        } else if (!UpdateRepairingCarActivity.selectedCarSupplies.isEmpty()) {
+            selectedCarSupplies = UpdateRepairingCarActivity.selectedCarSupplies;
         }
 
         for (int i = 0; i < selectedCarSupplies.size(); i++) {
@@ -81,7 +83,6 @@ public class CustomCarSupplyDialog extends AppCompatDialogFragment implements Re
                         long totalPrice = 0;
                         for (int i = 0; i < carSupplies.size(); i++) {
                             int quantity = Integer.parseInt(((CarSupplyAdapter.CarSupplyViewHolder)recyclerViewCarSupplyList.findViewHolderForAdapterPosition(i)).tvSupplyQuantity.getText().toString());
-                            Log.i("QUANTITY!!", String.valueOf(quantity));
                             if (quantity > 0) {
                                 carSupplies.get(i).setQuantity(quantity);
                                 selectedCarSupplies.add(carSupplies.get(i));
@@ -90,6 +91,7 @@ public class CustomCarSupplyDialog extends AppCompatDialogFragment implements Re
                         }
                         carSupplyAdapter.setData(carSupplies);
                         customCarSupplyDialogInterface.setCarSupplyTotalPrice(totalPrice);
+                        customCarSupplyDialogInterface.setCarSupplyAdapterData(selectedCarSupplies);
                     }
                 });
         return builder.create();
@@ -113,5 +115,6 @@ public class CustomCarSupplyDialog extends AppCompatDialogFragment implements Re
 
     public interface CustomCarSupplyDialogInterface {
         void setCarSupplyTotalPrice(long totalPrice);
+        void setCarSupplyAdapterData(List<CarSupply> carSupplies);
     }
 }

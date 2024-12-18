@@ -475,4 +475,9 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         totalCarSupplyPriceLong = totalPrice;
         tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
     }
+
+    @Override
+    public void setCarSupplyAdapterData(List<CarSupply> carSupplies) {
+        carSupplyAdapter.setData(carSupplies);
+    }
 }

@@ -453,4 +453,10 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         totalCarSupplyPriceLong = totalPrice;
         tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
     }
+
+    @Override
+    public void setCarSupplyAdapterData(List<CarSupply> carSupplies) {
+        carSupplyAdapter.setData(carSupplies);
+        AddRepairCardActivity.selectedCarSupplies = carSupplies;
+    }
 }

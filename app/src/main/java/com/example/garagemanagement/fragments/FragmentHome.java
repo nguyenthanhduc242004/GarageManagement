@@ -11,11 +11,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.example.garagemanagement.AddCarActivity;
 import com.example.garagemanagement.AddRepairCardActivity;
 import com.example.garagemanagement.DateDeserializer;
+import com.example.garagemanagement.MainActivity;
 import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
@@ -55,6 +57,8 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     List<Car> newCars = new ArrayList<>();
     List<Car> repairingCars = new ArrayList<>();
     List<Car> completedCars = new ArrayList<>();
+
+    public static int selectedState = -1;
 
     public FragmentHome() {
         // Required empty public constructor
@@ -111,16 +115,6 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             }
         });
 
-
-
-//        Fake call API
-//        Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "Mini", "0123456789", new Date(), 0, 1);
-//        Car car2 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Sedan", "0123456789", new Date(), 0, 1);
-//        Car car3 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "SUV", "0123456789", new Date(), 0, 2);
-//        Car car4 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Luxury", "0123456789", new Date(), 0, 0);
-//        Car car5 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Luxury", "0123456789", new Date(), 0, 1);
-//        Car car6 = new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
-//        cars = List.of(car1, car2, car3, car4, car5, car6);
 
         String json = "[\n" +
                 "  {\n" +
@@ -290,8 +284,53 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         completedCarsAdapter.setData(completedCars);
         recyclerViewCompletedCars.setAdapter(completedCarsAdapter);
 
+        Button tvNewCars = view.findViewById(R.id.tvNewCars);
+        tvNewCars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFragmentCars(0);
+            }
+        });
+        Button btnShowAllNewCars = view.findViewById(R.id.btnShowAllNewCars);
+        btnShowAllNewCars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFragmentCars(0);
+            }
+        });
+        Button tvRepairingCars = view.findViewById(R.id.tvRepairingCars);
+        tvRepairingCars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFragmentCars(1);
+            }
+        });
+        Button buttonShowAllRepairingCars = view.findViewById(R.id.btnShowAllRepairingCars);
+        buttonShowAllRepairingCars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFragmentCars(1);
+            }
+        });
+        Button tvCompletedCars = view.findViewById(R.id.tvCompletedCars);
+        tvCompletedCars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFragmentCars(2);
+            }
+        });
+        Button buttonShowAllCompletedCars = view.findViewById(R.id.btnShowAllCompletedCars);
+        buttonShowAllCompletedCars.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openFragmentCars(2);
+            }
+        });
+
         return view;
     }
+
+
 
     @Override
     public void onItemClick(int position) {
@@ -330,7 +369,10 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             intent.putExtra("CAR_SUPPLIES", (Serializable) repairingCars.get(position).getCarSupplies());
             startActivity(intent);
         }
+    }
 
-
+    public void openFragmentCars(int state) {
+        FragmentHome.selectedState = state;
+        MainActivity.bottomNav.setSelectedItemId(R.id.itCars);
     }
 }
