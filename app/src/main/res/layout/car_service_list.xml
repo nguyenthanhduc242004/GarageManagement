@@ -28,9 +28,10 @@
             android:textAlignment="center"
             android:background="@drawable/square_border"/>
         <TextView
+            android:id="@+id/tvCarServicePriceHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Giá (Luxury)"
+            android:text="Giá"
             android:paddingHorizontal="2dp"
             android:textColor="@color/black"
             android:layout_weight="2"

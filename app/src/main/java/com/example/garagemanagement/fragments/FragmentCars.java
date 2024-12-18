@@ -1,6 +1,7 @@
 package com.example.garagemanagement.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,17 +18,27 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
+import com.example.garagemanagement.DateDeserializer;
 import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.R;
+import com.example.garagemanagement.RepairingCarDetailActivity;
 import com.example.garagemanagement.adapter.CarAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.Serializable;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,6 +55,13 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
     CarAdapter carAdapter;
     SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
     Button btnCarState;
+
+    List<Car> unpaidCars = new ArrayList<>();
+    List<Car> newCars = new ArrayList<>();
+    List<Car> repairingCars = new ArrayList<>();
+    List<Car> completedCars = new ArrayList<>();
+    List<Car> filteredList = new ArrayList<>();
+    int selectedState = -1;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -86,23 +104,150 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_cars, container, false);
 
-        //        Fake call API
-        Car car1 = new Car("Nguyễn Thành Đức Đức Đức Đức Đức Đức", "78SH-000128", "Honda", "Mini", "0123456789", new Date(), 0, 1);
-        Car car2 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Aston Martin", "Sedan", "0123456789", new Date(), 0, 1);
-        Car car3 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Volkswagenasdasdasd asd", "TPHCM", "0123456789", new Date(), 0, 2);
-        Car car4 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "SUV", "0123456789", new Date(), 0, 0);
-        Car car5 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
-        Car car6 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Mini", "0123456789", new Date(), 0, 0);
-        Car car7 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "SUV", "0123456789", new Date(), 0, 0);
-        Car car8 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
-        Car car9 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
-        Car car10 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Sedan", "0123456789", new Date(), 0, 0);
-        Car car11 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "SUV", "0123456789", new Date(), 0, 0);
-        Car car12 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Luxury", "0123456789", new Date(), 0, 0);
-        Car car13 = new Car("Nguyễn Thành Đức", "78SH-001.28", "Honda", "Mni", "0123456789", new Date(), 0, 0);
+//        SEARCH VIEW
+        SearchView searchView = view.findViewById(R.id.searchView);
+        searchView.setIconified(false);
+        EditText txtSearch = ((EditText)searchView.findViewById(androidx.appcompat.R.id.search_src_text));
+        txtSearch.setHintTextColor(Color.LTGRAY);
+        txtSearch.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
+        
+        String json = "[\n" +
+                "  {\n" +
+                "    \"carId\": 1,\n" +
+                "    \"licensePlate\": \"29A-123.45\",\n" +
+                "    \"ownerName\": \"Nguyễn Thị Linh\",\n" +
+                "    \"carBrandId\": 1,\n" +
+                "    \"carBrandText\": \"Honda\",\n" +
+                "    \"carTypeId\": 1,\n" +
+                "    \"carTypeText\": \"Mini\",\n" +
+                "    \"phoneNumber\": \"0901234567\",\n" +
+                "    \"receiveDate\": \"2024, 02, 14\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 0,\n" +
+                "    \"carServices\": [],\n" +
+                "    \"carSupplies\": []\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 2,\n" +
+                "    \"licensePlate\": \"51F-987.65\",\n" +
+                "    \"ownerName\": \"Trần Minh Phúc\",\n" +
+                "    \"carBrandId\": 2,\n" +
+                "    \"carBrandText\": \"Aston Martin\",\n" +
+                "    \"carTypeId\": 2,\n" +
+                "    \"carTypeText\": \"Sedan\",\n" +
+                "    \"phoneNumber\": \"0987654321\",\n" +
+                "    \"receiveDate\": \"2024, 04, 10\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 1,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"3\", \"serviceName\": \"BẢO DƯỠNG CẤP TRUNG BÌNH LỚN (20.000) KM\", \"price\": 599000},\n" +
+                "      {\"serviceId\": \"6\", \"serviceName\": \"Vệ sinh kim phun (bao gồm dung dịch kèm theo)\", \"price\": 660000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"7\", \"supplyName\": \"Gạt mưa Bosch mềm\", \"price\": 600000, \"quantity\": 7},\n" +
+                "      {\"supplyId\": \"5\", \"supplyName\": \"Còi Denso\", \"price\": 500000, \"quantity\": 3}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 3,\n" +
+                "    \"licensePlate\": \"30H-456.78\",\n" +
+                "    \"ownerName\": \"Lê Hương Giang\",\n" +
+                "    \"carBrandId\": 3,\n" +
+                "    \"carBrandText\": \"Suzuki\",\n" +
+                "    \"carTypeId\": 3,\n" +
+                "    \"carTypeText\": \"SUV\",\n" +
+                "    \"phoneNumber\": \"0912345678\",\n" +
+                "    \"receiveDate\": \"2024, 06, 18\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 2,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"1\", \"serviceName\": \"BẢO DƯỠNG CẤP NHỎ (5000) KM\", \"price\": 199000},\n" +
+                "      {\"serviceId\": \"11\", \"serviceName\": \"Cân bằng động (100k/bánh)\", \"price\": 400000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"1\", \"supplyName\": \"Dung dịch phụ gia súc béc xăng (Wurth)\", \"price\": 300000, \"quantity\": 2},\n" +
+                "      {\"supplyId\": \"4\", \"supplyName\": \"Nước làm mát (Asin, Jinco)\", \"price\": 150000, \"quantity\": 5}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 4,\n" +
+                "    \"licensePlate\": \"79D-012.34\",\n" +
+                "    \"ownerName\": \"Phạm Quốc Anh\",\n" +
+                "    \"carBrandId\": 4,\n" +
+                "    \"carBrandText\": \"Vinfast\",\n" +
+                "    \"carTypeId\": 4,\n" +
+                "    \"carTypeText\": \"Luxury\",\n" +
+                "    \"phoneNumber\": \"0976543210\",\n" +
+                "    \"receiveDate\": \"2024, 08, 25\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 3,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
+                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
+                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 5,\n" +
+                "    \"licensePlate\": \"60C-876.54\",\n" +
+                "    \"ownerName\": \"Hoàng Thu Trang\",\n" +
+                "    \"carBrandId\": 2,\n" +
+                "    \"carBrandText\": \"Aston Martin\",\n" +
+                "    \"carTypeId\": 4,\n" +
+                "    \"carTypeText\": \"Luxury\",\n" +
+                "    \"phoneNumber\": \"0961112222\",\n" +
+                "    \"receiveDate\": \"2024, 10, 05\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 0,\n" +
+                "    \"carServices\": [],\n" +
+                "    \"carSupplies\": []\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 6,\n" +
+                "    \"licensePlate\": \"15B-789.01\",\n" +
+                "    \"ownerName\": \"Đỗ Văn Minh\",\n" +
+                "    \"carBrandId\": 4,\n" +
+                "    \"carBrandText\": \"Vinfast\",\n" +
+                "    \"carTypeId\": 4,\n" +
+                "    \"carTypeText\": \"Luxury\",\n" +
+                "    \"phoneNumber\": \"0345967735\",\n" +
+                "    \"receiveDate\": \"2024, 11, 30\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 1,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
+                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
+                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]";
 
-        cars = List.of(car1, car2, car3, car4, car5, car6, car7, car8, car9, car10, car11, car12, car13);
+//        Converting json into List<Car>
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, new DateDeserializer())
+                .create();
+        List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
 
+        for (int i = 0; i < cars.size(); i++) {
+            Car car = cars.get(i);
+            if (car.getState() == 0) {
+                newCars.add(car);
+                unpaidCars.add(car);
+            } else if (car.getState() == 1) {
+                repairingCars.add(car);
+                unpaidCars.add(car);
+            } else if (car.getState() == 2) {
+                completedCars.add(car);
+                unpaidCars.add(car);
+            }
+        }
+        filteredList = unpaidCars;
 
 //        CarDetailRecyclerView
         carAdapter = new CarAdapter(getContext(),CarAdapter.TYPE_CAR_LIST, this);
@@ -110,7 +255,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         RecyclerView recyclerViewCarList = view.findViewById(R.id.recyclerViewCarList);
         recyclerViewCarList.setLayoutManager(linearLayoutManager);
         recyclerViewCarList.setFocusable(false);
-        carAdapter.setData(cars);
+        carAdapter.setData(unpaidCars);
         recyclerViewCarList.setAdapter(carAdapter);
 
 
@@ -119,9 +264,6 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
 //        dividerItemDecoration.setDrawable(getResources().getDrawable(R.drawable.divider));
 //        recyclerViewCarList.addItemDecoration(dividerItemDecoration);
 
-//        SearchView
-        SearchView searchView = view.findViewById(R.id.searchView);
-        searchView.setIconified(false);
 
 //        Has to fake notifyDataSetChanged() because the keyboard abnormally disappear after first notifyDataSetChange()
         new android.os.Handler().postDelayed(new Runnable() {
@@ -138,7 +280,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filterList(newText);
+                filterList(newText, selectedState);
                 return true;
             }
         });
@@ -155,14 +297,22 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         return view;
     }
 
-    private void filterList(String text) {
-        List<Car> filteredList = new ArrayList<>();
-        for (Car car : cars) {
-            if (car.getOwnerName().toLowerCase().contains(text.toLowerCase())) {
+    private void filterList(String text, int selectedState) {
+        List<Car> targetedCars = unpaidCars;
+        if (selectedState == 0) {
+            targetedCars = newCars;
+        } else if (selectedState == 1) {
+            targetedCars = repairingCars;
+        } else if (selectedState == 2) {
+            targetedCars = completedCars;
+        }
+        filteredList = new ArrayList<>();
+        for (Car car : targetedCars) {
+            if (deAccent(car.getOwnerName()).toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(car);
             } else if (car.getLicensePlate().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(car);
-            } else if (car.getCarBrand().toLowerCase().contains(text.toLowerCase())) {
+            } else if (car.getCarBrandText().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(car);
             } else if (formatter.format(car.getReceiveDate()).contains(text.toLowerCase())) {
                 filteredList.add(car);
@@ -173,18 +323,38 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
 
     @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
-
-        intent.putExtra("LICENSE_PLATE", cars.get(position).getLicensePlate());
-        intent.putExtra("CAR_BRAND", cars.get(position).getCarBrand());
-        intent.putExtra("OWNER_NAME", cars.get(position).getOwnerName());
-        intent.putExtra("PHONE_NUMBER", cars.get(position).getPhoneNumber());
-        intent.putExtra("CAR_TYPE", cars.get(position).getCarType());
-        intent.putExtra("RECEIVE_DATE", formatter.format(cars.get(position).getReceiveDate()));
-        intent.putExtra("CAR_IMAGE", cars.get(position).getCarImage());
-        intent.putExtra("STATE", cars.get(position).getState());
-
-        startActivity(intent);
+        Car currentCar = filteredList.get(position);
+        int state = currentCar.getState();
+        if (state == 0) {
+            Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
+            intent.putExtra("LICENSE_PLATE", currentCar.getLicensePlate());
+            intent.putExtra("CAR_BRAND_ID", currentCar.getCarBrandId());
+            intent.putExtra("CAR_BRAND_TEXT", currentCar.getCarBrandText());
+            intent.putExtra("CAR_TYPE_ID", currentCar.getCarTypeId());
+            intent.putExtra("CAR_TYPE_TEXT", currentCar.getCarTypeText());
+            intent.putExtra("OWNER_NAME", currentCar.getOwnerName());
+            intent.putExtra("PHONE_NUMBER", currentCar.getPhoneNumber());
+            intent.putExtra("RECEIVE_DATE", formatter.format(currentCar.getReceiveDate()));
+            intent.putExtra("CAR_IMAGE", currentCar.getCarImage());
+            intent.putExtra("STATE", state);
+            startActivity(intent);
+        }
+        else if (state == 1) {
+            Intent intent = new Intent(getContext(), RepairingCarDetailActivity.class);
+            intent.putExtra("LICENSE_PLATE", currentCar.getLicensePlate());
+            intent.putExtra("CAR_BRAND_ID", currentCar.getCarBrandId());
+            intent.putExtra("CAR_BRAND_TEXT", currentCar.getCarBrandText());
+            intent.putExtra("CAR_TYPE_ID", currentCar.getCarTypeId());
+            intent.putExtra("CAR_TYPE_TEXT", currentCar.getCarTypeText());
+            intent.putExtra("OWNER_NAME", currentCar.getOwnerName());
+            intent.putExtra("PHONE_NUMBER", currentCar.getPhoneNumber());
+            intent.putExtra("RECEIVE_DATE", formatter.format(currentCar.getReceiveDate()));
+            intent.putExtra("CAR_IMAGE", currentCar.getCarImage());
+            intent.putExtra("STATE", state);
+            intent.putExtra("CAR_SERVICES", (Serializable) currentCar.getCarServices());
+            intent.putExtra("CAR_SUPPLIES", (Serializable) currentCar.getCarSupplies());
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -206,17 +376,35 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         if (itemId == R.id.optionAll) {
             btnCarState.setText("Tất cả");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
+            filteredList = unpaidCars;
+            carAdapter.setData(filteredList);
+            selectedState = -1;
         }
         else if (itemId == R.id.optionNew) {
             btnCarState.setText("Mới tiếp nhận");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+            filteredList = newCars;
+            carAdapter.setData(filteredList);
+            selectedState = 0;
         } else if (itemId == R.id.optionRepairing) {
             btnCarState.setText("Đang sửa");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
+            filteredList = repairingCars;
+            carAdapter.setData(filteredList);
+            selectedState = 1;
         } else if (itemId == R.id.optionCompleted) {
             btnCarState.setText("Mới hoàn thành");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
+            filteredList = completedCars;
+            carAdapter.setData(filteredList);
+            selectedState = 2;
         }
         return super.onContextItemSelected(item);
+    }
+
+    public String deAccent(String str) {
+        String nfdNormalizedString = Normalizer.normalize(str, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(nfdNormalizedString).replaceAll("");
     }
 }

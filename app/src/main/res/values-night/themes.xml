@@ -2,6 +2,7 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.GarageManagement" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
+        <item name="android:textColorPrimary">@color/white</item>
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
         <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
     </style>

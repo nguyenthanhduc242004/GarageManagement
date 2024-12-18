@@ -1,20 +1,27 @@
 package com.example.garagemanagement;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.MediaStore;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -23,22 +30,30 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
-import com.example.garagemanagement.Objects.Car;
+import com.example.garagemanagement.Objects.CarBrand;
 import com.example.garagemanagement.Objects.CarService;
 import com.example.garagemanagement.Objects.CarSupply;
+import com.example.garagemanagement.Objects.CarType;
+import com.example.garagemanagement.adapter.CarBrandSpinnerAdapter;
 import com.example.garagemanagement.adapter.CarServiceAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
+import com.example.garagemanagement.adapter.CarTypeSpinnerAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
 
-public class RepairingCarDetailActivity extends AppCompatActivity implements RecyclerViewInterface, CustomCarSupplyDialog.CustomCarSupplyDialogInterface {
+public class UpdateRepairingCarActivity extends AppCompatActivity implements RecyclerViewInterface, CustomCarSupplyDialog.CustomCarSupplyDialogInterface {
+    DatePickerDialog datePickerDialog;
+    Button buttonOpenCamera;
+    Button buttonDeleteImage;
+    ImageView ivCarImage;
+    Button buttonDate;
+
     SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
     NumberFormat currencyFormatter = new DecimalFormat("#,###");
     CarServiceAdapter carServiceAdapter;
@@ -58,141 +73,19 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_repairing_car_detail);
+        setContentView(R.layout.activity_update_repairing_car);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        tvTotalPrice = findViewById(R.id.tvTotalPrice);
-//        HIDING UNNECESSARY COMPONENTS:
-        Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
-        Button addCarSupplyButton = findViewById(R.id.addCarSupplyButton);
-        addCarServiceButton.setVisibility(View.GONE);
-        addCarSupplyButton.setVisibility(View.GONE);
-
-//        BACK BUTTON:
-        ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
-        imageButtonBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-
-//        BASIC CAR INFORMATION:
-        Intent intent = getIntent();
-        String licensePlate = intent.getStringExtra("LICENSE_PLATE");
-        String carBrandId = intent.getStringExtra("CAR_BRAND_ID");
-        String carBrandText = intent.getStringExtra("CAR_BRAND_TEXT");
-        String carTypeId = intent.getStringExtra("CAR_TYPE_ID");
-        String carTypeText = intent.getStringExtra("CAR_TYPE_TEXT");
-        String ownerName = intent.getStringExtra("OWNER_NAME");
-        String phoneNumber = intent.getStringExtra("PHONE_NUMBER");
-        String receiveDate = intent.getStringExtra("RECEIVE_DATE");
-        int carImage = intent.getIntExtra("CAR_IMAGE", 0);
-        int state = intent.getIntExtra("STATE", -1);
-        List<CarService> selectedCarServices = (List<CarService>) intent.getSerializableExtra("CAR_SERVICES");
-        List<CarSupply> selectedCarSupplies = (List<CarSupply>) intent.getSerializableExtra("CAR_SUPPLIES");
-
-        TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
-        TextView tvCarBrand = findViewById(R.id.tvCarBrand);
-        TextView tvCarType = findViewById(R.id.tvCarType);
-        TextView tvOwnerName = findViewById(R.id.tvOwnerName);
-        TextView tvPhoneNumber = findViewById(R.id.tvPhoneNumber);
-        TextView tvReceiveDate = findViewById(R.id.tvReceiveDate);
-        ImageView ivCarImage = findViewById(R.id.ivCarImage);
-
-        tvLicensePlate.setText(licensePlate);
-        tvCarBrand.setText(carBrandText);
-        tvCarType.setText(carTypeText);
-        tvOwnerName.setText(ownerName);
-        tvPhoneNumber.setText(phoneNumber);
-        tvReceiveDate.setText(receiveDate);
-        if (carImage == 0) {
-            ivCarImage.setImageResource(R.drawable.no_image);
-        } else {
-            ivCarImage.setImageResource(carImage);
-        }
-
-//        EDIT BUTTON:
-        Button buttonEdit = findViewById(R.id.buttonUpdateCar);
-        buttonEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RepairingCarDetailActivity.this, UpdateRepairingCarActivity.class);
-                intent.putExtra("LICENSE_PLATE", licensePlate);
-                intent.putExtra("CAR_BRAND_ID", carBrandId);
-                intent.putExtra("CAR_BRAND_TEXT", carBrandText);
-                intent.putExtra("CAR_TYPE_ID", carTypeId);
-                intent.putExtra("CAR_TYPE_TEXT", carTypeText);
-                intent.putExtra("OWNER_NAME", ownerName);
-                intent.putExtra("PHONE_NUMBER", phoneNumber);
-                intent.putExtra("RECEIVE_DATE", receiveDate);
-                intent.putExtra("CAR_IMAGE", carImage);
-                intent.putExtra("CAR_SERVICES", (Serializable) selectedCarServices);
-                intent.putExtra("CAR_SUPPLIES", (Serializable) selectedCarSupplies);
-                startActivity(intent);
-            }
-        });
-
-//        TOGGLE CAR INFORMATION BUTTON:
-        LinearLayout carDetailWrapper = findViewById(R.id.car_detail_wrapper);
-        Button toggleCarInformationButton = findViewById(R.id.toggleCarInformationButton);
-        toggleCarInformationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (carDetailWrapper.getVisibility() == View.GONE) {
-                    carDetailWrapper.setVisibility(View.VISIBLE);
-                    toggleCarInformationButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_down_24, 0, 0, 0);
-                } else if (carDetailWrapper.getVisibility() == View.VISIBLE) {
-                    carDetailWrapper.setVisibility(View.GONE);
-                    toggleCarInformationButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_right_24, 0, 0, 0);
-                }
-            }
-
-        });
-
-//        TOGGLE CAR SERVICE LIST BUTTON:
-        LinearLayout carServiceWrapper = findViewById(R.id.car_service_wrapper);
-        Button toggleCarServicesButton = findViewById(R.id.toggleCarServicesButton);
-        toggleCarServicesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (carServiceWrapper.getVisibility() == View.GONE) {
-                    carServiceWrapper.setVisibility(View.VISIBLE);
-                    toggleCarServicesButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_down_24, 0, 0, 0);
-                }
-                else if (carServiceWrapper.getVisibility() == View.VISIBLE) {
-                    carServiceWrapper.setVisibility(View.GONE);
-                    toggleCarServicesButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_right_24, 0, 0, 0);
-                }
-            }
-        });
-
-        // CarServiceAdapter
-        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
-        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
-        recyclerViewCarServiceList.setFocusable(false);
-        carServiceAdapter.setData(selectedCarServices);
-        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
-
-//      SET totalCarServicePrice
-        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
-        for (int i = 0; i < selectedCarServices.size(); i++) {
-            totalCarServicePriceLong += selectedCarServices.get(i).getPrice();
-        }
-        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
-
-//        CALL API CAR SERVICES:
+    //        CALL API CAR SERVICES:
+//        TODO: WRONG JSON!!! -> CALLING API CAR SERVICES WILL BE BASED ON CAR TYPE!!!
         String carServicesJson = "[\n" +
                 "    {\n" +
                 "        \"serviceId\": 1,\n" +
                 "        \"serviceName\": \"BẢO DƯỠNG CẤP NHỎ (5000) KM\",\n" +
-                "        \"description\": \"Cần thực hiện khi xe chạy được 5.000km, 25, 35, 45...\",\n" +
                 "        \"prices\": {\n" +
                 "            \"1\": 149000,\n" +
                 "            \"2\": 149000,\n" +
@@ -203,7 +96,6 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                 "    {\n" +
                 "        \"serviceId\": 2,\n" +
                 "        \"serviceName\": \"BẢO DƯỠNG CẤP TRUNG BÌNH (10.000) KM\",\n" +
-                "        \"description\": \"Cần thực hiện khi xe chạy được 10.000km, 30, 50, 70, 90...\",\n" +
                 "        \"prices\": {\n" +
                 "            \"1\": 299000,\n" +
                 "            \"2\": 299000,\n" +
@@ -214,7 +106,6 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                 "    {\n" +
                 "        \"serviceId\": 3,\n" +
                 "        \"serviceName\": \"BẢO DƯỠNG CẤP TRUNG BÌNH LỚN (20.000) KM\",\n" +
-                "        \"description\": \"Cần thực hiện khi xe chạy được 20.000km, 60, 100, 140, 180...\",\n" +
                 "        \"prices\": {\n" +
                 "            \"1\": 399000,\n" +
                 "            \"2\": 499000,\n" +
@@ -225,7 +116,6 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                 "    {\n" +
                 "        \"serviceId\": 4,\n" +
                 "        \"serviceName\": \"BẢO DƯỠNG CẤP LỚN (40.000) KM\",\n" +
-                "        \"description\": \"Cần thực hiện khi xe chạy được 40.000km, 80, 120, 160, 200...\",\n" +
                 "        \"prices\": {\n" +
                 "            \"1\": 799000,\n" +
                 "            \"2\": 999000,\n" +
@@ -304,8 +194,220 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                 "        }\n" +
                 "    }\n" +
                 "]";
+        Gson gson2 = new GsonBuilder().create();
+        List<CarService> allCarServices = gson2.fromJson(carServicesJson, new TypeToken<List<CarService>>() {}.getType());
+
+
+//        BACK BUTTON:
+        ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
+        imageButtonBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+//        FOOTER BUTTONS:
+        Button footerButtonLeft = findViewById(R.id.footerButtonLeft);
+        footerButtonLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+        Button footerButtonRight = findViewById(R.id.footerButtonRight);
+
+//        BASIC CAR INFORMATION:
+        String licensePlate = getIntent().getStringExtra("LICENSE_PLATE");
+        String carBrandId = getIntent().getStringExtra("CAR_BRAND_ID");
+        String carBrandText = getIntent().getStringExtra("CAR_BRAND_TEXT");
+        String carTypeId = getIntent().getStringExtra("CAR_TYPE_ID");
+        String carTypeText = getIntent().getStringExtra("CAR_TYPE_TEXT");
+        String ownerName = getIntent().getStringExtra("OWNER_NAME");
+        String phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
+        String receiveDate = getIntent().getStringExtra("RECEIVE_DATE");
+        int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
+        int state = getIntent().getIntExtra("STATE", -1);
+        List<CarService> selectedCarServices = (List<CarService>) getIntent().getSerializableExtra("CAR_SERVICES");
+        List<CarSupply> selectedCarSupplies = (List<CarSupply>) getIntent().getSerializableExtra("CAR_SUPPLIES");
+
+        EditText etLicensePlate = findViewById(R.id.etLicensePlate);
+        Spinner spinnerCarBrand = findViewById(R.id.spinnerCarBrand);
+        Spinner spinnerCarType = findViewById(R.id.spinnerCarType);
+        EditText etOwnerName = findViewById(R.id.etOwnerName);
+        EditText etPhoneNumber = findViewById(R.id.etPhoneNumber);
+        buttonDate = findViewById(R.id.buttonDate);
+        ivCarImage = findViewById(R.id.ivCarImage);
+
+        etLicensePlate.setText(licensePlate);
+        etOwnerName.setText(ownerName);
+        etPhoneNumber.setText(phoneNumber);
+        buttonDate.setText(receiveDate);
+
+//        CAR BRAND SPINNER:
+        // CALL API CarBrand:
+        String carBrandJson = "[\n" +
+                "        {\"carBrandId\": 1, \"carBrandText\": \"Honda\"},\n" +
+                "        {\"carBrandId\": 2, \"carBrandText\": \"Aston Martin\"},\n" +
+                "        {\"carBrandId\": 3, \"carBrandText\": \"Suzuki\"},\n" +
+                "        {\"carBrandId\": 4, \"carBrandText\": \"Vinfast\"}\n" +
+                "]";
         Gson gson = new GsonBuilder().create();
-        List<CarService> allCarServices = gson.fromJson(carServicesJson, new TypeToken<List<CarService>>() {}.getType());
+        List<CarBrand> carBrands = gson.fromJson(carBrandJson, new TypeToken<List<CarBrand>>() {}.getType());
+
+        CarBrandSpinnerAdapter carBrandSpinnerAdapter = new CarBrandSpinnerAdapter(this, R.layout.item_car_brand_selected, carBrands);
+        spinnerCarBrand.setAdapter(carBrandSpinnerAdapter);
+        int spinnerCarBrandIndex = 0;
+        for (int i = 0; i < carBrands.size(); i++) {
+            if (carBrands.get(i).getCarBrandId().equals(carBrandId)) {
+                spinnerCarBrandIndex = i;
+                break;
+            }
+        }
+        spinnerCarBrand.setSelection(spinnerCarBrandIndex);
+        spinnerCarBrand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+//        CAR TYPE SPINNER:
+        // CALL API CarBrand:
+        String carTypeJson = "[\n" +
+                "  {\"carTypeId\": 1, \"carTypeText\": \"Mini\"},\n" +
+                "  {\"carTypeId\": 2, \"carTypeText\": \"Sedan\"},\n" +
+                "  {\"carTypeId\": 3, \"carTypeText\": \"SUV\"},\n" +
+                "  {\"carTypeId\": 4, \"carTypeText\": \"Luxury\"}\n" +
+                "]";
+        Gson gson1 = new GsonBuilder().create();
+        List<CarType> carTypes = gson1.fromJson(carTypeJson, new TypeToken<List<CarType>>() {}.getType());
+
+        CarTypeSpinnerAdapter carTypeSpinnerAdapter = new CarTypeSpinnerAdapter(this, R.layout.item_car_type_selected, carTypes);
+        spinnerCarType.setAdapter(carTypeSpinnerAdapter);
+        int spinnerCarTypeIndex = 0;
+        for (int i = 0; i < carTypes.size(); i++) {
+            if (carTypes.get(i).getCarTypeId().equals(carTypeId)) {
+                spinnerCarTypeIndex = i;
+                break;
+            }
+        }
+        TextView tvCarServicePriceHeader = findViewById(R.id.tvCarServicePriceHeader);
+        spinnerCarType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
+                tvCarServicePriceHeader.setText(String.format("Giá (%s)", carTypes.get(i).getCarTypeText()));
+//                TODO: CALL API CAR SERVICES BASES ON CAR TYPE
+//                TODO: THEN SET DATA TO CAR SERVICE ADAPTER
+//                TODO: THEN SET DATA TO allCarServices
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        spinnerCarType.setSelection(spinnerCarTypeIndex);
+
+//        DATE PICKER:
+        buttonDate = findViewById(R.id.buttonDate);
+        initDatePicker();
+        buttonDate.setText(receiveDate);
+        buttonDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                datePickerDialog.show();
+            }
+        });
+
+//        CAR IMAGE:
+        ivCarImage = findViewById(R.id.ivCarImage);
+        buttonOpenCamera = findViewById(R.id.buttonOpenCamera);
+        buttonDeleteImage = findViewById(R.id.buttonDeleteImage);
+        if (carImage == 0) {
+            ivCarImage.setImageResource(R.drawable.no_image);
+        } else {
+            ivCarImage.setImageResource(carImage);
+        }
+
+        buttonOpenCamera.setText("Chụp Lại Ảnh");
+        buttonOpenCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(openCamera, 100);
+            }
+        });
+
+        buttonDeleteImage.setVisibility(View.VISIBLE);
+        ImageView finalIvCarImage = ivCarImage;
+        buttonDeleteImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finalIvCarImage.setImageBitmap(null);
+                buttonDeleteImage.setVisibility(View.GONE);
+                buttonOpenCamera.setText("Thêm Ảnh Chụp");
+            }
+        });
+
+//        TOGGLE CAR INFORMATION BUTTON:
+        LinearLayout carDetailWrapper = findViewById(R.id.car_detail_wrapper);
+        carDetailWrapper.setVisibility(View.VISIBLE);
+
+        Button toggleCarInformationButton = findViewById(R.id.toggleCarInformationButton);
+        toggleCarInformationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (carDetailWrapper.getVisibility() == View.GONE) {
+                    carDetailWrapper.setVisibility(View.VISIBLE);
+                    toggleCarInformationButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_down_24, 0, 0, 0);
+                } else if (carDetailWrapper.getVisibility() == View.VISIBLE) {
+                    carDetailWrapper.setVisibility(View.GONE);
+                    toggleCarInformationButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_right_24, 0, 0, 0);
+                }
+            }
+
+        });
+
+        //        TOGGLE CAR SERVICE LIST BUTTON:
+        LinearLayout carServiceWrapper = findViewById(R.id.car_service_wrapper);
+        Button toggleCarServicesButton = findViewById(R.id.toggleCarServicesButton);
+        toggleCarServicesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (carServiceWrapper.getVisibility() == View.GONE) {
+                    carServiceWrapper.setVisibility(View.VISIBLE);
+                    toggleCarServicesButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_down_24, 0, 0, 0);
+                }
+                else if (carServiceWrapper.getVisibility() == View.VISIBLE) {
+                    carServiceWrapper.setVisibility(View.GONE);
+                    toggleCarServicesButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_right_24, 0, 0, 0);
+                }
+            }
+        });
+
+        // CarServiceAdapter
+        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
+        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
+        recyclerViewCarServiceList.setFocusable(false);
+        carServiceAdapter.setData(selectedCarServices);
+        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
+
+//      SET totalCarServicePrice
+        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
+        for (int i = 0; i < selectedCarServices.size(); i++) {
+            totalCarServicePriceLong += selectedCarServices.get(i).getPrice();
+        }
+        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
 
 //        ADD CAR SERVICE BUTTON:
         String[] carServiceNames = new String[allCarServices.size()];
@@ -314,13 +416,14 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         }
 
         boolean[] checkedServices = new boolean[allCarServices.size()];
+        Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
         addCarServiceButton = findViewById(R.id.addCarServiceButton);
         List<CarService> finalCarServices = allCarServices;
         addCarServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(RepairingCarDetailActivity.this);
+                androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(UpdateRepairingCarActivity.this);
                 builder.setTitle("Chọn Dịch Vụ");
                 builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
@@ -363,7 +466,7 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                     }
                 });
 
-                AlertDialog alertDialog = builder.create();
+                androidx.appcompat.app.AlertDialog alertDialog = builder.create();
                 // Show alert dialog
                 alertDialog.show();
             }
@@ -425,8 +528,8 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                 "        \"price\": 600000\n" +
                 "    }\n" +
                 "]";
-        Gson gson1 = new GsonBuilder().create();
-        List<CarSupply> allCarSupplies = gson1.fromJson(carServicesJson, new TypeToken<List<CarSupply>>() {}.getType());
+        Gson gson3 = new GsonBuilder().create();
+        List<CarSupply> allCarSupplies = gson3.fromJson(carServicesJson, new TypeToken<List<CarSupply>>() {}.getType());
 
 //      SET totalCarSupplyPrice
         totalCarSupplyPrice = findViewById(R.id.totalCarSupplyPrice);
@@ -447,6 +550,7 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
 
         totalCarSupplyPrice = findViewById(R.id.totalCarSupplyPrice);
         totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarSupplyPriceLong)));
+        Button addCarSupplyButton = findViewById(R.id.addCarSupplyButton);
         addCarSupplyButton = findViewById(R.id.addCarSupplyButton);
         addCarSupplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -459,6 +563,56 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
     }
 
+    private void initDatePicker() {
+        DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                month = month + 1;
+                String date = makeDateString(day, month, year);
+                buttonDate.setText(date);
+            }
+        };
+
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        int style = AlertDialog.THEME_HOLO_LIGHT;
+
+        datePickerDialog = new DatePickerDialog(this, style, dateSetListener, year, month, day);
+    }
+
+
+    private String makeDateString(int day, int month, int year) {
+        return day + "/" + month + "/" + year;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100) {
+            if (resultCode == RESULT_OK) {
+                buttonOpenCamera.setText("Chụp Lại Ảnh");
+                buttonDeleteImage.setVisibility(View.VISIBLE);
+                try {
+                    Bitmap image = (Bitmap) data.getExtras().get("data");
+                    ivCarImage.setImageBitmap(image);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setCarSupplyTotalPrice(long totalPrice) {
+        totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalPrice)));
+        totalCarSupplyPriceLong = totalPrice;
+        tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
+    }
+
     @Override
     public void onItemClick(int position) {
 
@@ -467,12 +621,5 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
     @Override
     public void onItemClick(int position, int state) {
 
-    }
-
-    @Override
-    public void setCarSupplyTotalPrice(long totalPrice) {
-        totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalPrice)));
-        totalCarSupplyPriceLong = totalPrice;
-        tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
     }
 }

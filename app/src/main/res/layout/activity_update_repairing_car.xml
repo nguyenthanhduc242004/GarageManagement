@@ -38,21 +38,9 @@
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/buttonUpdateCar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="Sửa"
-                android:minWidth="0dp"
-                android:paddingHorizontal="20dp"
-                android:textColor="@color/textColor"
-                android:backgroundTint="@color/white"/>
-
-
             <include
-                android:id="@+id/repairing_car_detail"
-                layout="@layout/repairing_car_detail"
+                android:id="@+id/update_repairing_car"
+                layout="@layout/update_repairing_car"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tvHeading"/>
@@ -69,15 +57,25 @@
         android:paddingBottom="12dp">
 
         <Button
-            android:id="@+id/footerButton"
+            android:id="@+id/footerButtonLeft"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:paddingVertical="4dp"
+            android:backgroundTint="@color/yellow"
+            android:text="Quay lại"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/footerButtonRight"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:layout_weight="1"
             android:paddingVertical="4dp"
             android:backgroundTint="@color/green"
-            android:text="Sửa Xong"
-            android:drawableLeft="@drawable/baseline_check_24"
+            android:text="Cập nhật"
             android:textColor="@color/white" />
     </LinearLayout>
 

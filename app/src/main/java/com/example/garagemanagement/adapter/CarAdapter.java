@@ -1,7 +1,6 @@
 package com.example.garagemanagement.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,11 +67,11 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         }
         holder.state = car.getState();
         holder.tvLicensePlate.setText(car.getLicensePlate());
-        holder.tvCarBrand.setText(car.getCarBrand());
         holder.tvOwnerName.setText(car.getOwnerName());
         int type = holder.getItemViewType();
         if (type == TYPE_CAR_HOME) {
             holder.ivCarImage.setImageResource(car.getCarImage());
+            holder.tvCarBrand.setText(car.getCarBrandText());
             int carImage = car.getCarImage();
             if (carImage == 0) {
                 holder.ivCarImage.setImageResource(R.drawable.no_image);
@@ -90,23 +89,31 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
             }
             else if (state == Car.STATE_REPAIRING) {
                 holder.homeCarUpperButton.setText("Sửa Xong");
-                holder.homeCarLowerButton.setText("Sửa Thêm");
+                holder.homeCarLowerButton.setVisibility(View.GONE);
                 holder.homeCarUpperButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.green));
-                holder.homeCarLowerButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.yellow));
                 holder.homeCarUpperButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_check_24, 0, 0, 0);
-                holder.homeCarLowerButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_add_24, 0, 0, 0);
             }
             else if (state == Car.STATE_COMPLETED) {
+                holder.homeCarLowerButton.setVisibility(View.GONE);
                 holder.homeCarUpperButton.setText("Thanh Toán");
-                holder.homeCarLowerButton.setText("Sửa Thêm");
                 holder.homeCarUpperButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.green));
-                holder.homeCarLowerButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.yellow));
                 holder.homeCarUpperButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.outline_payment_24, 0, 0, 0);
-                holder.homeCarLowerButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_add_24, 0, 0, 0);
             }
         }
         else if (type == TYPE_CAR_LIST) {
             holder.tvReceiveDate.setText(formatter.format(car.getReceiveDate()));
+            String carStateText = "aString";
+            if (holder.state == 0) {
+                carStateText = "Mới tiếp nhận";
+                holder.tvCarState.setTextColor(ContextCompat.getColor(context, R.color.red));
+            } else if (holder.state == 1) {
+                carStateText = "Đang sửa";
+                holder.tvCarState.setTextColor(ContextCompat.getColor(context, R.color.yellow));
+            } else if (holder.state == 2) {
+                carStateText = "Mới hoàn thành";
+                holder.tvCarState.setTextColor(ContextCompat.getColor(context, R.color.green));
+            }
+            holder.tvCarState.setText(carStateText);
         }
     }
 
@@ -126,6 +133,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         private TextView tvReceiveDate;
         private Button homeCarUpperButton;
         private Button homeCarLowerButton;
+        private TextView tvCarState;
         private int state;
 
         public CarViewHolder(View itemView) {
@@ -137,6 +145,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
             tvReceiveDate = itemView.findViewById(R.id.tvReceiveDate);
             homeCarUpperButton = itemView.findViewById(R.id.homeCarUpperButton);
             homeCarLowerButton = itemView.findViewById(R.id.homeCarLowerButton);
+            tvCarState = itemView.findViewById(R.id.tvCarState);
 
             if (type == TYPE_CAR_HOME) {
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -157,8 +166,6 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
                         if (recyclerViewInterface != null) {
                             int position = getAdapterPosition();
                             if (position != RecyclerView.NO_POSITION) {
-                                Log.i("POSITION", String.valueOf(position));
-                                Log.i("STATESTATE", String.valueOf(state));
                                 recyclerViewInterface.onItemClick(position);
                             }
                         }

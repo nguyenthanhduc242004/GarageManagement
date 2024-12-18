@@ -1,6 +1,8 @@
 package com.example.garagemanagement.Objects;
 
-public class CarSupply {
+import java.io.Serializable;
+
+public class CarSupply implements Serializable {
     private String supplyId;
     private String supplyName;
     private long price;

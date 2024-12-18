@@ -25,19 +25,6 @@
         android:layout_toEndOf="@+id/tvOwnerNameText"
         android:ems="10"
         android:inputType="text"
-        android:textColor="@color/textColor"
-        android:visibility="gone"/>
-
-    <TextView
-        android:id="@+id/tvLicensePlate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/tvLicensePlateText"
-        android:layout_alignBottom="@+id/tvLicensePlateText"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="12dp"
-        android:gravity="center_vertical"
-        android:layout_toEndOf="@+id/tvOwnerNameText"
         android:textColor="@color/textColor"/>
 
     <TextView
@@ -190,37 +177,8 @@
     <ImageView
         android:id="@+id/ivCarImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/footerButtons"
+        android:layout_height="240dp"
         android:layout_below="@+id/buttonOpenCamera"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp" />
-
-    <LinearLayout
-        android:id="@+id/footerButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
-        <Button
-            android:id="@+id/footerButtonLeft"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/yellow"
-            android:text="Thoát"
-            android:textColor="@color/white"
-            android:layout_marginEnd="8dp"
-            android:paddingVertical="4dp"
-            android:layout_weight="1"/>
-
-        <Button
-            android:id="@+id/footerButtonRight"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/green"
-            android:text="Thêm mới"
-            android:paddingVertical="4dp"
-            android:textColor="@color/white"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"/>
-    </LinearLayout>
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

@@ -10,11 +10,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -23,17 +21,21 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.garagemanagement.Objects.CarBrand;
+import com.example.garagemanagement.Objects.CarType;
 import com.example.garagemanagement.adapter.CarBrandSpinnerAdapter;
 import com.example.garagemanagement.adapter.CarTypeSpinnerAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class AddCarActivity extends AppCompatActivity {
     ImageView ivCarImage;
     DatePickerDialog datePickerDialog;
-    Button dateButton;
+    Button buttonDate;
     Button buttonOpenCamera;
     Button buttonDeleteImage;
 
@@ -48,12 +50,6 @@ public class AddCarActivity extends AppCompatActivity {
             return insets;
         });
 
-//        SET VISIBILITY FOR etLicensePlate
-        EditText etLicensePlate = findViewById(R.id.etLicensePlate);
-        etLicensePlate.setVisibility(View.VISIBLE);
-        TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
-        tvLicensePlate.setVisibility(View.GONE);
-
 //        BACK BUTTON:
         ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
@@ -66,12 +62,15 @@ public class AddCarActivity extends AppCompatActivity {
 
 //        CAR BRAND SPINNER:
         Spinner spinnerCarBrand = findViewById(R.id.spinnerCarBrand);
-
-        // Fake call API:
-        List<String> carBrands = new ArrayList<>();
-        carBrands.add("Honda");
-        carBrands.add("Suzuki");
-        carBrands.add("Aston Martin");
+        // CALL API CarBrand:
+        String json = "[\n" +
+                "        {\"carBrandId\": 1, \"carBrandText\": \"Honda\"},\n" +
+                "        {\"carBrandId\": 2, \"carBrandText\": \"Aston Martin\"},\n" +
+                "        {\"carBrandId\": 3, \"carBrandText\": \"Suzuki\"},\n" +
+                "        {\"carBrandId\": 4, \"carBrandText\": \"Vinfast\"}\n" +
+                "]";
+        Gson gson = new GsonBuilder().create();
+        List<CarBrand> carBrands = gson.fromJson(json, new TypeToken<List<CarBrand>>() {}.getType());
 
         CarBrandSpinnerAdapter carBrandSpinnerAdapter = new CarBrandSpinnerAdapter(this, R.layout.item_car_brand_selected, carBrands);
         spinnerCarBrand.setAdapter(carBrandSpinnerAdapter);
@@ -87,15 +86,17 @@ public class AddCarActivity extends AppCompatActivity {
             }
         });
 
-//          CAR TYPE SPINNER:
+//        CAR BRAND SPINNER:
         Spinner spinnerCarType = findViewById(R.id.spinnerCarType);
-
-        // Fake call API:
-        List<String> carTypes = new ArrayList<>();
-        carTypes.add("Mini");
-        carTypes.add("Sedan");
-        carTypes.add("SUV");
-        carTypes.add("Luxury");
+        // CALL API CarBrand:
+        String carTypeJson = "[\n" +
+                "  {\"carTypeId\": 1, \"carTypeText\": \"Mini\"},\n" +
+                "  {\"carTypeId\": 2, \"carTypeText\": \"Sedan\"},\n" +
+                "  {\"carTypeId\": 3, \"carTypeText\": \"SUV\"},\n" +
+                "  {\"carTypeId\": 4, \"carTypeText\": \"Luxury\"}\n" +
+                "]";
+        Gson gson1 = new GsonBuilder().create();
+        List<CarType> carTypes = gson1.fromJson(carTypeJson, new TypeToken<List<CarType>>() {}.getType());
 
         CarTypeSpinnerAdapter carTypeSpinnerAdapter = new CarTypeSpinnerAdapter(this, R.layout.item_car_type_selected, carTypes);
         spinnerCarType.setAdapter(carTypeSpinnerAdapter);
@@ -112,10 +113,10 @@ public class AddCarActivity extends AppCompatActivity {
         });
 
 //        DATE PICKER:
+        buttonDate = findViewById(R.id.buttonDate);
         initDatePicker();
-        dateButton = findViewById(R.id.buttonDate);
-        dateButton.setText(getTodaysDate());
-        dateButton.setOnClickListener(new View.OnClickListener() {
+        buttonDate.setText(getTodaysDate());
+        buttonDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 datePickerDialog.show();
@@ -178,7 +179,7 @@ public class AddCarActivity extends AppCompatActivity {
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                  month = month + 1;
                  String date = makeDateString(day, month, year);
-                 dateButton.setText(date);
+                 buttonDate.setText(date);
             }
         };
 

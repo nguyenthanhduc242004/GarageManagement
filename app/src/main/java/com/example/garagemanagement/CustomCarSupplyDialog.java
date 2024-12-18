@@ -89,7 +89,6 @@ public class CustomCarSupplyDialog extends AppCompatDialogFragment implements Re
                             }
                         }
                         carSupplyAdapter.setData(carSupplies);
-                        customCarSupplyDialogInterface.setCarSupplyListData(selectedCarSupplies);
                         customCarSupplyDialogInterface.setCarSupplyTotalPrice(totalPrice);
                     }
                 });
@@ -113,7 +112,6 @@ public class CustomCarSupplyDialog extends AppCompatDialogFragment implements Re
     }
 
     public interface CustomCarSupplyDialogInterface {
-        void setCarSupplyListData(List<CarSupply> selectedCarSupplies);
         void setCarSupplyTotalPrice(long totalPrice);
     }
 }

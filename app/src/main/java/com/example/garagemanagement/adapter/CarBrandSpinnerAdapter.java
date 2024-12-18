@@ -10,12 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.garagemanagement.Objects.CarBrand;
 import com.example.garagemanagement.R;
 
 import java.util.List;
 
-public class CarBrandSpinnerAdapter extends ArrayAdapter<String> {
-    public CarBrandSpinnerAdapter(@NonNull Context context, int resource, @NonNull List<String> objects) {
+public class CarBrandSpinnerAdapter extends ArrayAdapter<CarBrand> {
+    public CarBrandSpinnerAdapter(@NonNull Context context, int resource, @NonNull List<CarBrand> objects) {
         super(context, resource, objects);
     }
 
@@ -25,7 +26,8 @@ public class CarBrandSpinnerAdapter extends ArrayAdapter<String> {
         convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_car_brand_selected, parent, false);
         TextView tvSelected = convertView.findViewById(R.id.tvSelected);
         if (this.getItem(position) != null) {
-            tvSelected.setText(this.getItem(position));
+            tvSelected.setText(this.getItem(position).getCarBrandText());
+            tvSelected.setTag(this.getItem(position));
         }
         return convertView;
     }
@@ -35,7 +37,8 @@ public class CarBrandSpinnerAdapter extends ArrayAdapter<String> {
         convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_car_brand, parent, false);
         TextView tvCarBrand = convertView.findViewById(R.id.tvCarBrandText);
         if (this.getItem(position) != null) {
-            tvCarBrand.setText(this.getItem(position));
+            tvCarBrand.setText(this.getItem(position).getCarBrandText());
+            tvCarBrand.setTag(this.getItem(position));
         }
         return convertView;
     }

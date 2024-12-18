@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -28,6 +29,9 @@ import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.adapter.CarServiceAdapter;
 import com.example.garagemanagement.adapter.CarSpinnerAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -89,34 +93,180 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         TextView tvPhoneNumber = findViewById(R.id.tvPhoneNumber);
         TextView tvCarType = findViewById(R.id.tvCarType);
         TextView tvReceiveDate = findViewById(R.id.tvReceiveDate);
+        ImageView ivCarImage = findViewById(R.id.ivCarImage);
 
         //        CAR BRAND SPINNER:
         Spinner spinner = findViewById(R.id.spinner);
 
-        // Fake call API:
-        List<Car> unpaidCars = new ArrayList<>();
-        unpaidCars.add(new Car("Nguyễn Thành Đức", "78SH-000126", "Honda", "TPHCM", "0123456789", new Date(), 0, 0));
-        unpaidCars.add(new Car("Nguyễn Thành Đức Đức ĐứcĐức ĐứcĐức ĐứcĐức ĐứcĐức ĐứcĐức", "78SH-000129", "Honda", "TPHCM", "0123456789", new Date(), 0, 1));
-        unpaidCars.add(new Car("Nguyễn Thành Đức", "78SH-000127", "Honda", "TPHCM", "0123456789", new Date(), 0, 2));
-        unpaidCars.add(new Car("Nguyễn Thành Đức", "78SH-000128", "Honda", "TPHCM", "0123456789", new Date(), 0, 3));
+        String json = "[\n" +
+                "  {\n" +
+                "    \"carId\": 1,\n" +
+                "    \"licensePlate\": \"29A-123.45\",\n" +
+                "    \"ownerName\": \"Nguyễn Thị Linh\",\n" +
+                "    \"carBrandId\": 1,\n" +
+                "    \"carBrandText\": \"Honda\",\n" +
+                "    \"carTypeId\": 1,\n" +
+                "    \"carTypeText\": \"Mini\",\n" +
+                "    \"phoneNumber\": \"0901234567\",\n" +
+                "    \"receiveDate\": \"2024, 02, 14\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 0,\n" +
+                "    \"carServices\": [],\n" +
+                "    \"carSupplies\": []\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 2,\n" +
+                "    \"licensePlate\": \"51F-987.65\",\n" +
+                "    \"ownerName\": \"Trần Minh Phúc\",\n" +
+                "    \"carBrandId\": 2,\n" +
+                "    \"carBrandText\": \"Aston Martin\",\n" +
+                "    \"carTypeId\": 2,\n" +
+                "    \"carTypeText\": \"Sedan\",\n" +
+                "    \"phoneNumber\": \"0987654321\",\n" +
+                "    \"receiveDate\": \"2024, 04, 10\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 1,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"3\", \"serviceName\": \"BẢO DƯỠNG CẤP TRUNG BÌNH LỚN (20.000) KM\", \"price\": 599000},\n" +
+                "      {\"serviceId\": \"6\", \"serviceName\": \"Vệ sinh kim phun (bao gồm dung dịch kèm theo)\", \"price\": 660000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"7\", \"supplyName\": \"Gạt mưa Bosch mềm\", \"price\": 600000, \"quantity\": 7},\n" +
+                "      {\"supplyId\": \"5\", \"supplyName\": \"Còi Denso\", \"price\": 500000, \"quantity\": 3}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 3,\n" +
+                "    \"licensePlate\": \"30H-456.78\",\n" +
+                "    \"ownerName\": \"Lê Hương Giang\",\n" +
+                "    \"carBrandId\": 3,\n" +
+                "    \"carBrandText\": \"Suzuki\",\n" +
+                "    \"carTypeId\": 3,\n" +
+                "    \"carTypeText\": \"SUV\",\n" +
+                "    \"phoneNumber\": \"0912345678\",\n" +
+                "    \"receiveDate\": \"2024, 06, 18\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 2,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"1\", \"serviceName\": \"BẢO DƯỠNG CẤP NHỎ (5000) KM\", \"price\": 199000},\n" +
+                "      {\"serviceId\": \"11\", \"serviceName\": \"Cân bằng động (100k/bánh)\", \"price\": 400000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"1\", \"supplyName\": \"Dung dịch phụ gia súc béc xăng (Wurth)\", \"price\": 300000, \"quantity\": 2},\n" +
+                "      {\"supplyId\": \"4\", \"supplyName\": \"Nước làm mát (Asin, Jinco)\", \"price\": 150000, \"quantity\": 5}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 4,\n" +
+                "    \"licensePlate\": \"79D-012.34\",\n" +
+                "    \"ownerName\": \"Phạm Quốc Anh\",\n" +
+                "    \"carBrandId\": 4,\n" +
+                "    \"carBrandText\": \"Vinfast\",\n" +
+                "    \"carTypeId\": 4,\n" +
+                "    \"carTypeText\": \"Luxury\",\n" +
+                "    \"phoneNumber\": \"0976543210\",\n" +
+                "    \"receiveDate\": \"2024, 08, 25\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 3,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
+                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
+                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 5,\n" +
+                "    \"licensePlate\": \"60C-876.54\",\n" +
+                "    \"ownerName\": \"Hoàng Thu Trang\",\n" +
+                "    \"carBrandId\": 2,\n" +
+                "    \"carBrandText\": \"Aston Martin\",\n" +
+                "    \"carTypeId\": 4,\n" +
+                "    \"carTypeText\": \"Luxury\",\n" +
+                "    \"phoneNumber\": \"0961112222\",\n" +
+                "    \"receiveDate\": \"2024, 10, 05\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 0,\n" +
+                "    \"carServices\": [],\n" +
+                "    \"carSupplies\": []\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"carId\": 6,\n" +
+                "    \"licensePlate\": \"15B-789.01\",\n" +
+                "    \"ownerName\": \"Đỗ Văn Minh\",\n" +
+                "    \"carBrandId\": 4,\n" +
+                "    \"carBrandText\": \"Vinfast\",\n" +
+                "    \"carTypeId\": 4,\n" +
+                "    \"carTypeText\": \"Luxury\",\n" +
+                "    \"phoneNumber\": \"0345967735\",\n" +
+                "    \"receiveDate\": \"2024, 11, 30\",\n" +
+                "    \"carImage\": 0,\n" +
+                "    \"state\": 1,\n" +
+                "    \"carServices\": [\n" +
+                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
+                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
+                "    ],\n" +
+                "    \"carSupplies\": [\n" +
+                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
+                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]";
+
+//        Converting json into List<Car>
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(Date.class, new DateDeserializer())
+                .create();
+        List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
+        List<Car> newCars = new ArrayList<>();
+
+        for (int i = 0; i < cars.size(); i++) {
+            Car car = cars.get(i);
+            if (car.getState() == 0) {
+                newCars.add(car);
+            }
+        }
 
 //        CAR SPINNER:
-        CarSpinnerAdapter carSpinnerAdapter = new CarSpinnerAdapter(this, R.layout.item_car_brand_selected, unpaidCars);
+        CarSpinnerAdapter carSpinnerAdapter = new CarSpinnerAdapter(this, R.layout.item_car_brand_selected, newCars);
         spinner.setAdapter(carSpinnerAdapter);
+        TextView tvCarServicePriceHeader = findViewById(R.id.tvCarServicePriceHeader);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 currentCar = (Car) adapterView.getItemAtPosition(i);
                 if (currentCar.getLicensePlate() != tvLicensePlate.getText()) {
-                    tvOwnerName.setText(currentCar.getOwnerName());
                     tvLicensePlate.setText(currentCar.getLicensePlate());
-                    tvCarBrand.setText(currentCar.getCarBrand());
+                    tvCarBrand.setText(currentCar.getCarBrandText());
+                    tvCarType.setText(currentCar.getCarTypeText());
+                    tvOwnerName.setText(currentCar.getOwnerName());
                     tvPhoneNumber.setText(currentCar.getPhoneNumber());
-                    tvCarType.setText(currentCar.getCarType());
                     tvReceiveDate.setText(dateFormatter.format(currentCar.getReceiveDate()));
-                    carServiceAdapter.setData(new ArrayList<>());
-                    totalCarServicePrice.setText("Tổng: 0đ");
+                    if (currentCar.getCarImage() == 0) {
+                        ivCarImage.setImageResource(R.drawable.no_image);
+                    } else {
+                        ivCarImage.setImageResource(currentCar.getCarImage());
+                    }
 
+                    tvCarServicePriceHeader.setText(String.format("Giá (%s)", currentCar.getCarTypeText()));
+//                TODO: CALL API CAR SERVICES BASES ON CAR TYPE
+//                TODO: THEN SET DATA TO CAR SERVICE ADAPTER
+//                TODO: THEN SET DATA TO allCarServices
+                    carServiceAdapter.setData(currentCar.getCarServices());
+                    carSupplyAdapter.setData(currentCar.getCarSupplies());
+                    totalCarSupplyPriceLong = 0;
+                    for (int j = 0; j < currentCar.getCarSupplies().size(); j++) {
+                        totalCarSupplyPriceLong += currentCar.getCarSupplies().get(j).getPrice();
+                    }
+                    totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarSupplyPriceLong)));
+                    totalCarServicePriceLong = 0;
+                    for (int j = 0; j < currentCar.getCarServices().size(); j++) {
+                        totalCarServicePriceLong += currentCar.getCarServices().get(j).getPrice();
+                    }
+                    totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
+                    tvTotalPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong + totalCarSupplyPriceLong)));
                 }
             }
 
@@ -271,7 +421,7 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(getApplicationContext());
         recyclerViewCarSupplyList.setLayoutManager(linearLayoutManager1);
         recyclerViewCarSupplyList.setFocusable(false);
-        carSupplyAdapter.setData(selectedCarSupplies);
+        carSupplyAdapter.setData(new ArrayList<>());
         recyclerViewCarSupplyList.setAdapter(carSupplyAdapter);
 
 
@@ -295,12 +445,6 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
     @Override
     public void onItemClick(int position, int state) {
 
-    }
-
-    @Override
-    public void setCarSupplyListData(List<CarSupply> carSupplies) {
-        carSupplyAdapter.setData(carSupplies);
-        selectedCarSupplies = carSupplies;
     }
 
     @Override

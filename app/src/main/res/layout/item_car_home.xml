@@ -54,6 +54,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:lines="2"
+                android:gravity="center_vertical"
                 android:ellipsize="end"
                 android:textColor="@color/textColor"
                 android:text="Nguyễn Thành Đức" />

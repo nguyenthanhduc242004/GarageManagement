@@ -30,7 +30,7 @@ public class CarSpinnerAdapter extends ArrayAdapter<Car> {
         TextView tvOwnerName = convertView.findViewById(R.id.tvOwnerNameText);
         TextView tvCarSate = convertView.findViewById(R.id.tvSpinnerCarState);
         if (this.getItem(position) != null) {
-            tvLicensePlateAndCarBrand.setText(String.format("%s - %s", this.getItem(position).getLicensePlate(), this.getItem(position).getCarBrand()));
+            tvLicensePlateAndCarBrand.setText(String.format("%s - %s", this.getItem(position).getLicensePlate(), this.getItem(position).getCarBrandText()));
             tvOwnerName.setText(this.getItem(position).getOwnerName());
             int state = this.getItem(position).getState();
             String stateText = "";
@@ -62,7 +62,7 @@ public class CarSpinnerAdapter extends ArrayAdapter<Car> {
         TextView tvOwnerName = convertView.findViewById(R.id.tvOwnerNameText);
         TextView tvCarSate = convertView.findViewById(R.id.tvSpinnerCarState);
         if (this.getItem(position) != null) {
-            tvLicensePlateAndCarBrand.setText(String.format("%s - %s", this.getItem(position).getLicensePlate(), this.getItem(position).getCarBrand()));
+            tvLicensePlateAndCarBrand.setText(String.format("%s - %s", this.getItem(position).getLicensePlate(), this.getItem(position).getCarBrandText()));
             tvOwnerName.setText(this.getItem(position).getOwnerName());
             int state = this.getItem(position).getState();
             String stateText = "";

@@ -51,6 +51,7 @@
         android:textColor="@color/textColor" />
 
 
+
     <TextView
         android:id="@+id/tvCarTypeText"
         android:layout_width="wrap_content"
@@ -74,7 +75,6 @@
         android:gravity="center_vertical"
         android:layout_toEndOf="@+id/tvCarTypeText"
         android:textColor="@color/textColor" />
-
 
     <TextView
         android:id="@+id/tvOwnerNameText"
@@ -164,6 +164,7 @@
         android:layout_width="match_parent"
         android:layout_marginTop="12dp"
         android:layout_height="240dp"
-        android:layout_below="@+id/buttonOpenCamera"    />
+        android:layout_below="@+id/buttonOpenCamera"
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>
