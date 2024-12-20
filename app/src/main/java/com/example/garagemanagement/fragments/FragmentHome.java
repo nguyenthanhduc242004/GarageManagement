@@ -51,7 +51,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
     List<Car> cars;
     List<Car> newCars = new ArrayList<>();

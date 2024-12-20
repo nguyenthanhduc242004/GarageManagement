@@ -40,7 +40,7 @@ import java.util.List;
 
 public class AddRepairCardActivity extends AppCompatActivity implements RecyclerViewInterface, CustomCarSupplyDialog.CustomCarSupplyDialogInterface {
     Car currentCar;
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
     NumberFormat currencyFormatter = new DecimalFormat("#,###");
     CarServiceAdapter carServiceAdapter;
     TextView totalCarServicePrice;

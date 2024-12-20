@@ -21,6 +21,7 @@ public class Car {
     private int state;
     private List<CarService> carServices;
     private List<CarSupply> carSupplies;
+    private Date paymentDate;
 
     public Car(String ownerName, String licensePlate, String carBrandId, String carBrandText, String carTypeId, String carTypeText, String phoneNumber, Date receiveDate, int carImage, int state) {
         this.ownerName = ownerName;
@@ -152,5 +153,13 @@ public class Car {
 
     public void setCarTypeId(String carTypeId) {
         this.carTypeId = carTypeId;
+    }
+
+    public Date getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(Date paymentDate) {
+        this.paymentDate = paymentDate;
     }
 }

@@ -22,9 +22,10 @@ import java.util.List;
 public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
     public static final int TYPE_CAR_HOME = 0;
     public static final int TYPE_CAR_LIST = 1;
+    public static final int TYPE_CAR_PAID = 2;
     private final int type;
 
-    private final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
     private List<Car> cars;
     private final RecyclerViewInterface recyclerViewInterface;
     Context context;
@@ -55,6 +56,9 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         }
         else if (viewType == TYPE_CAR_LIST) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_car_list, parent, false);
+        }
+        else if (viewType == TYPE_CAR_PAID) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_payment_list, parent, false);
         }
         return new CarViewHolder(view);
     }
@@ -115,6 +119,10 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
             }
             holder.tvCarState.setText(carStateText);
         }
+        else if (type == TYPE_CAR_PAID) {
+            holder.tvReceiveDate.setText(formatter.format(car.getReceiveDate()));
+            holder.tvPaymentDate.setText(formatter.format(car.getPaymentDate()));
+        }
     }
 
     @Override
@@ -134,6 +142,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
         private Button homeCarUpperButton;
         private Button homeCarLowerButton;
         private TextView tvCarState;
+        private TextView tvPaymentDate;
         private int state;
 
         public CarViewHolder(View itemView) {
@@ -146,6 +155,7 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
             homeCarUpperButton = itemView.findViewById(R.id.homeCarUpperButton);
             homeCarLowerButton = itemView.findViewById(R.id.homeCarLowerButton);
             tvCarState = itemView.findViewById(R.id.tvCarState);
+            tvPaymentDate = itemView.findViewById(R.id.tvPaymentDate);
 
             if (type == TYPE_CAR_HOME) {
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +170,18 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
                     }
                 });
             } else if (type == TYPE_CAR_LIST) {
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (recyclerViewInterface != null) {
+                            int position = getAdapterPosition();
+                            if (position != RecyclerView.NO_POSITION) {
+                                recyclerViewInterface.onItemClick(position);
+                            }
+                        }
+                    }
+                });
+            } else if (type == TYPE_CAR_PAID) {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

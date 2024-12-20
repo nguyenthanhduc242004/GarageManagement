@@ -54,7 +54,7 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
     ImageView ivCarImage;
     Button buttonDate;
 
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
     NumberFormat currencyFormatter = new DecimalFormat("#,###");
     CarServiceAdapter carServiceAdapter;
     TextView totalCarServicePrice;

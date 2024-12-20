@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -53,7 +54,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
     private static final String ARG_PARAM2 = "param2";
     List<Car> cars;
     CarAdapter carAdapter;
-    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
     Button btnCarState;
 
     List<Car> unpaidCars = new ArrayList<>();
@@ -109,7 +110,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
 //        SEARCH VIEW
         searchView = view.findViewById(R.id.searchView);
         searchView.setIconified(false);
-        EditText txtSearch = ((EditText)searchView.findViewById(androidx.appcompat.R.id.search_src_text));
+        EditText txtSearch = (EditText) searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         txtSearch.setHintTextColor(Color.LTGRAY);
         txtSearch.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
@@ -119,7 +120,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
                 return true;
             }
         });
-        
+
         String json = "[\n" +
                 "  {\n" +
                 "    \"carId\": 1,\n" +
@@ -243,6 +244,11 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
                 .create();
         List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
 
+        newCars = new ArrayList<>();
+        repairingCars = new ArrayList<>();
+        completedCars = new ArrayList<>();
+        unpaidCars = new ArrayList<>();
+
         for (int i = 0; i < cars.size(); i++) {
             Car car = cars.get(i);
             if (car.getState() == 0) {
@@ -257,16 +263,17 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             }
         }
 
-        int selectedState = FragmentHome.selectedState;
-        if (selectedState == -1) {
-            filteredList = unpaidCars;
-        } else if (selectedState == 0) {
-            filteredList = newCars;
-        } else if (selectedState == 1) {
-            filteredList = repairingCars;
-        } else if (selectedState == 2) {
-            filteredList = completedCars;
-        }
+//        int fragmentHomeState = FragmentHome.selectedState;
+//        Log.i("fragmentHomeStateUpper", String.valueOf(fragmentHomeState));
+//        if (fragmentHomeState == -1) {
+//            filteredList = unpaidCars;
+//        } else if (fragmentHomeState == 0) {
+//            filteredList = newCars;
+//        } else if (fragmentHomeState == 1) {
+//            filteredList = repairingCars;
+//        } else if (fragmentHomeState == 2) {
+//            filteredList = completedCars;
+//        }
 
 //        CarDetailRecyclerView
         carAdapter = new CarAdapter(getContext(),CarAdapter.TYPE_CAR_LIST, this);
@@ -274,7 +281,10 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         RecyclerView recyclerViewCarList = view.findViewById(R.id.recyclerViewCarList);
         recyclerViewCarList.setLayoutManager(linearLayoutManager);
         recyclerViewCarList.setFocusable(false);
-        carAdapter.setData(filteredList);
+        Log.i("FragmentHome.selectedState", String.valueOf(FragmentHome.selectedState));
+        if (FragmentHome.selectedState == -1) {
+            carAdapter.setData(filteredList);
+        }
         recyclerViewCarList.setAdapter(carAdapter);
 
 
@@ -299,7 +309,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filterList(newText, selectedState);
+                filterList(newText);
                 return true;
             }
         });
@@ -318,32 +328,34 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
     @Override
     public void onResume() {
         super.onResume();
-        int selectedState = FragmentHome.selectedState;
-        if (selectedState == -1) {
+        selectedState = FragmentHome.selectedState;
+        int fragmentHomeState = FragmentHome.selectedState;
+        Log.i("fragmentHomeState", String.valueOf(fragmentHomeState));
+        if (fragmentHomeState == -1) {
             filteredList = unpaidCars;
             searchView.setQuery("", false);
-        } else if (selectedState == 0) {
+        } else if (fragmentHomeState == 0) {
             filteredList = newCars;
             searchView.setQuery("", false);
-        } else if (selectedState == 1) {
+        } else if (fragmentHomeState == 1) {
             filteredList = repairingCars;
             searchView.setQuery("", false);
-        } else if (selectedState == 2) {
+        } else if (fragmentHomeState == 2) {
             filteredList = completedCars;
             searchView.setQuery("", false);
         }
         carAdapter.setData(filteredList);
-        if (selectedState == -1) {
+        if (fragmentHomeState == -1) {
             btnCarState.setText("Chọn tình trạng");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.textColor));
         }
-        else if (selectedState == 0) {
+        else if (fragmentHomeState == 0) {
             btnCarState.setText("Mới tiếp nhận");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        } else if (selectedState == 1) {
+        } else if (fragmentHomeState == 1) {
             btnCarState.setText("Đang sửa");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.yellow));
-        } else if (selectedState == 2) {
+        } else if (fragmentHomeState == 2) {
             btnCarState.setText("Mới hoàn thành");
             btnCarState.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
         }
@@ -351,8 +363,9 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         FragmentHome.selectedState = -1;
     }
 
-    private void filterList(String text, int selectedState) {
+    private void filterList(String text) {
         List<Car> targetedCars = unpaidCars;
+        Log.i("selectedState", String.valueOf(selectedState));
         if (selectedState == 0) {
             targetedCars = newCars;
         } else if (selectedState == 1) {
@@ -362,13 +375,14 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         }
         filteredList = new ArrayList<>();
         for (Car car : targetedCars) {
-            if (deAccent(car.getOwnerName()).toLowerCase().contains(text.toLowerCase())) {
+            String lowercaseText = text.toLowerCase();
+            if (car.getOwnerName().toLowerCase().contains(lowercaseText)) {
                 filteredList.add(car);
-            } else if (car.getLicensePlate().toLowerCase().contains(text.toLowerCase())) {
+            } else if (deAccent(car.getOwnerName()).toLowerCase().contains(lowercaseText)) {
                 filteredList.add(car);
-            } else if (car.getCarBrandText().toLowerCase().contains(text.toLowerCase())) {
+            } else if (car.getLicensePlate().toLowerCase().contains(lowercaseText)) {
                 filteredList.add(car);
-            } else if (formatter.format(car.getReceiveDate()).contains(text.toLowerCase())) {
+            } else if (formatter.format(car.getReceiveDate()).contains(lowercaseText)) {
                 filteredList.add(car);
             }
         }
