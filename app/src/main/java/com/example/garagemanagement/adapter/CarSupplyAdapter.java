@@ -1,9 +1,11 @@
 package com.example.garagemanagement.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +15,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.garagemanagement.AdminActivities.AdminEditCarSupplyActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.CarService;
 import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.R;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
 
 public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarSupplyViewHolder> {
     public static final int TYPE_LIST = 0;
     public static final int TYPE_DIALOG = 1;
+    public static final int TYPE_MANAGEMENT = 2;
     private final int type;
 
     private final RecyclerViewInterface recyclerViewInterface;
@@ -58,6 +63,9 @@ public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarS
         }
         else if (viewType == TYPE_LIST) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_car_supply, parent, false);
+        }
+        else if (viewType == TYPE_MANAGEMENT) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_car_supply_management, parent, false);
         }
         return new CarSupplyViewHolder(view);
     }
@@ -104,6 +112,26 @@ public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarS
                 }
             });
         }
+        else if (type == TYPE_MANAGEMENT) {
+            holder.tvSupplyName.setText(carSupply.getSupplyName());
+            holder.tvPrice.setText(String.format("%sđ", formatter.format(carSupply.getPrice())));
+            holder.buttonEdit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, AdminEditCarSupplyActivity.class);
+                    intent.putExtra("SUPPLY_ID", carSupply.getSupplyId());
+                    intent.putExtra("SUPPLY_NAME", carSupply.getSupplyName());
+                    intent.putExtra("PRICE", carSupply.getPrice());
+                    context.startActivity(intent);
+                }
+            });
+            holder.buttonDelete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // TODO: DO SOMETHING HERE!!!
+                }
+            });
+        }
     }
 
     @Override
@@ -121,6 +149,8 @@ public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarS
         public TextView tvSupplyQuantity;
         private ImageButton minusButton;
         private ImageButton plusButton;
+        MaterialButton buttonEdit;
+        MaterialButton buttonDelete;
 
         public CarSupplyViewHolder(View itemView) {
             super(itemView);
@@ -130,6 +160,8 @@ public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarS
             tvSupplyQuantity = itemView.findViewById(R.id.tvSupplyQuantity);
             minusButton = itemView.findViewById(R.id.minusButton);
             plusButton = itemView.findViewById(R.id.plusButton);
+            buttonEdit = itemView.findViewById(R.id.buttonEdit);
+            buttonDelete = itemView.findViewById(R.id.buttonDelete);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

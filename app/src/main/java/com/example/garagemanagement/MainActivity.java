@@ -1,5 +1,6 @@
 package com.example.garagemanagement;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
 
         // Deleting the weird margin bottom of the BottomNavigationView
         bottomNav = findViewById(R.id.bottomNav);

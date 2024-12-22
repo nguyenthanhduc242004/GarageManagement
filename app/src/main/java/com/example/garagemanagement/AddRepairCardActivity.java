@@ -320,6 +320,7 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         recyclerViewCarServiceList.setAdapter(carServiceAdapter);
 
 //        ADD CAR SERVICE BUTTON:
+        // TODO: CALL API PROPERLY
         // FAKE CALL API SERVICE LIST:
         CarService carService1 = new CarService("1", "Bảo dưỡng cấp nhỏ (5000) KM", 149000);
         CarService carService2 = new CarService("2", "Bảo dưỡng cấp trung bình (10.000) KM", 299000);

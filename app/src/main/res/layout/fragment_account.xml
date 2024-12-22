@@ -1,14 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.FragmentAccount">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.FragmentAccount"
+    android:orientation="vertical">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/changePasswordButton"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Account fragment" />
+        android:layout_height="wrap_content"
+        app:strokeWidth="2dp"
+        app:strokeColor="#000"
+        android:text="Đổi Mật Khẩu"
+        android:layout_marginTop="12dp"
+        android:textColor="@color/textColor"
+        android:backgroundTint="@color/white"
+        android:layout_marginHorizontal="12dp"
+        android:paddingVertical="12dp"
+        android:textSize="16sp"
+        />
 
-</FrameLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/logoutButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginHorizontal="12dp"
+        android:paddingVertical="12dp"
+        android:textSize="16sp"
+        app:strokeWidth="2dp"
+        app:strokeColor="#000"
+        android:text="Đăng Xuất"
+        android:textColor="@color/textColor"
+        android:backgroundTint="@color/white"
+        />
+
+</LinearLayout>
