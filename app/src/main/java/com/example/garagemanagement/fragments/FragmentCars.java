@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.example.garagemanagement.DateDeserializer;
 import com.example.garagemanagement.NewCarDetailActivity;
@@ -419,8 +418,8 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             intent.putExtra("RECEIVE_DATE", formatter.format(currentCar.getReceiveDate()));
             intent.putExtra("CAR_IMAGE", currentCar.getCarImage());
             intent.putExtra("STATE", state);
-            intent.putExtra("CAR_SERVICES", (Serializable) currentCar.getCarServices());
-            intent.putExtra("CAR_SUPPLIES", (Serializable) currentCar.getCarSupplies());
+            intent.putExtra("CAR_SERVICES", (Serializable) currentCar.getCarServiceList());
+            intent.putExtra("CAR_SUPPLIES", (Serializable) currentCar.getCarSupplyList());
             startActivity(intent);
         }
     }

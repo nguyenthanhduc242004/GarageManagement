@@ -1,10 +1,12 @@
 package com.example.garagemanagement.AdminActivities;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
+import android.icu.text.DecimalFormat;
+import android.icu.text.NumberFormat;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -17,9 +19,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.CarService;
+import com.example.garagemanagement.Objects.CarType;
 import com.example.garagemanagement.R;
-import com.example.garagemanagement.adapter.CarServiceAdapter;
-import com.google.android.material.button.MaterialButton;
+import com.example.garagemanagement.adapter.CarTypeAdapter;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,54 +32,55 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AdminCarServiceManagementActivity extends AppCompatActivity implements RecyclerViewInterface {
-    CarServiceAdapter carServiceAdapter;
+public class AdminCarServiceDetailActivity extends AppCompatActivity implements RecyclerViewInterface {
     FirebaseFirestore db;
-    List<CarService> carServices = new ArrayList<>();
     ProgressDialog progressDialog;
+    CarTypeAdapter carTypeAdapter;
+    RecyclerView recyclerViewCarServicePrice;
+    List<CarType> carTypes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_admin_car_service_management);
+        setContentView(R.layout.activity_admin_car_service_detail);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        //        BACK BUTTON:
+        CarService passedCarService = (CarService) getIntent().getSerializableExtra("CAR_SERVICE");
+
+        //BACK BUTTON:
         ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
         imageButtonBack.setOnClickListener(view -> {
             finish();
         });
+
+        TextView tvServiceName = findViewById(R.id.tvServiceName);
+        tvServiceName.setText(passedCarService.getServiceName());
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Đang tải...");
         progressDialog.show();
 
-        carServiceAdapter = new CarServiceAdapter(this, CarServiceAdapter.TYPE_MANAGEMENT, null, this);
+        carTypeAdapter = new CarTypeAdapter(this, CarTypeAdapter.TYPE_CAR_SERVICE_PRICE_UNEDITABLE,passedCarService , this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        RecyclerView recyclerViewCarServiceManagement = findViewById(R.id.recyclerViewCarServiceManagement);
-        recyclerViewCarServiceManagement.setLayoutManager(linearLayoutManager);
-        recyclerViewCarServiceManagement.setFocusable(false);
-        recyclerViewCarServiceManagement.setAdapter(carServiceAdapter);
+        recyclerViewCarServicePrice = findViewById(R.id.recyclerViewCarServicePrice);
+        recyclerViewCarServicePrice.setLayoutManager(linearLayoutManager);
+        recyclerViewCarServicePrice.setFocusable(false);
+        recyclerViewCarServicePrice.setAdapter(carTypeAdapter);
 
         db = FirebaseFirestore.getInstance();
         EventChangeListener();
-        carServiceAdapter.setData(carServices);
-
-        MaterialButton buttonAdd = findViewById(R.id.buttonAdd);
-        buttonAdd.setOnClickListener(view -> {
-            Intent intent = new Intent(AdminCarServiceManagementActivity.this, AdminAddCarServiceActivity.class);
-            startActivity(intent);
-        });
+        carTypeAdapter.setData(carTypes);
     }
 
     private void EventChangeListener() {
-        db.collection("CarService")
+        db.collection("CarType")
+                .orderBy("carTypeText")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -91,30 +94,30 @@ public class AdminCarServiceManagementActivity extends AppCompatActivity impleme
                             QueryDocumentSnapshot document = dc.getDocument();
                             DocumentChange.Type type = dc.getType();
                             Boolean usable = document.getBoolean("usable");
-                            CarService carService = document.toObject(CarService.class);
-                            carService.setServiceId(document.getId());
+                            CarType carType = document.toObject(CarType.class);
+                            carType.setCarTypeId(document.getId());
                             if (type == DocumentChange.Type.ADDED) {
                                 if (usable) {
-                                    carServices.add(carService);
+                                    carTypes.add(carType);
                                 }
                             } else if (type == DocumentChange.Type.MODIFIED) {
                                 boolean isFound = false;
-                                for (int i = 0; i < carServices.size(); i++) {
-                                    if (carServices.get(i).getServiceId().equals(carService.getServiceId())) {
+                                for (int i = 0; i < carTypes.size(); i++) {
+                                    if (carTypes.get(i).getCarTypeId().equals(carType.getCarTypeId())) {
                                         isFound = true;
                                         if (usable) {
-                                            carServices.set(i, carService);
+                                            carTypes.set(i, carType);
                                         } else {
-                                            carServices.remove(i);
+                                            carTypes.remove(i);
                                         }
                                         break;
                                     }
                                 }
                                 if (!isFound && usable) {
-                                    carServices.add(carService);
+                                    carTypes.add(carType);
                                 }
                             }
-                            carServiceAdapter.setData(carServices);
+                            carTypeAdapter.setData(carTypes);
                             if (progressDialog.isShowing())
                                 progressDialog.dismiss();
                         }
@@ -124,9 +127,7 @@ public class AdminCarServiceManagementActivity extends AppCompatActivity impleme
 
     @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(AdminCarServiceManagementActivity.this, AdminCarServiceDetailActivity.class);
-        intent.putExtra("CAR_SERVICE", carServices.get(position));
-        startActivity(intent);
+
     }
 
     @Override

@@ -16,25 +16,31 @@ import android.widget.ImageButton;
 
 import com.example.garagemanagement.AddCarActivity;
 import com.example.garagemanagement.AddRepairCardActivity;
-import com.example.garagemanagement.DateDeserializer;
+import com.example.garagemanagement.FirestoreHelper;
 import com.example.garagemanagement.MainActivity;
 import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
+import com.example.garagemanagement.Objects.CarService;
+import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.R;
 import com.example.garagemanagement.RepairingCarDetailActivity;
 import com.example.garagemanagement.adapter.CarAdapter;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONObject;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,10 +59,12 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     private String mParam2;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
-    List<Car> cars;
+    List<Car> cars = new ArrayList<>();
     List<Car> newCars = new ArrayList<>();
     List<Car> repairingCars = new ArrayList<>();
     List<Car> completedCars = new ArrayList<>();
+
+    FirebaseFirestore db;
 
     public static int selectedState = -1;
 
@@ -233,11 +241,102 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                 "  }\n" +
                 "]";
 
-//        Converting json into List<Car>
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Date.class, new DateDeserializer())
-                .create();
-        List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
+////        Converting json into List<Car>
+//        Gson gson = new GsonBuilder()
+//                .registerTypeAdapter(Date.class, new DateDeserializer())
+//                .create();
+//        List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
+
+//        db = FirebaseFirestore.getInstance();
+//        helper.runTaskInBackground("Car", new FirestoreCallback() {
+//            @Override
+//            public void onSuccess(DocumentSnapshot document) {
+//                if (document != null) {
+//                    Car car = document.toObject(Car.class);
+//                    List<CarService> carServiceList = new ArrayList<>();
+//                    List<CarSupply> carSupplyList = new ArrayList<>();
+//
+//                    // Track the number of async tasks
+//                    AtomicInteger remainingTasks = new AtomicInteger(car.getCarServices().size() + car.getCarSupplies().size());
+//
+//                    // Callback to notify when all tasks are complete
+//                    Runnable onComplete = () -> {
+//                        if (remainingTasks.get() == 0) {
+//                            car.setCarServiceList(carServiceList);
+//                            car.setCarSupplyList(carSupplyList);
+//                            Log.i("carServiceListSize", String.valueOf(carServiceList.size()));
+//                            Log.i("carSupplyListSize", String.valueOf(carSupplyList.size()));
+//                            cars.add(car);
+//                        }
+//                    };
+//
+//                    // Fetch CarService data
+//                    for (String id : car.getCarServices()) {
+//                        helper.runTaskInBackground("CarService", "serviceId", id, new FirestoreCallback() {
+//                            @Override
+//                            public void onSuccess(DocumentSnapshot document) {
+//                                if (document != null) {
+//                                    synchronized (carServiceList) {
+//                                        carServiceList.add(document.toObject(CarService.class));
+//                                    }
+//                                } else {
+//                                    Log.d("Firestore", "No CarService document found.");
+//                                }
+//                                remainingTasks.decrementAndGet();
+//                                onComplete.run();
+//                            }
+//
+//                            @Override
+//                            public void onFailure(Exception e) {
+//                                Log.e("Firestore", "Error fetching CarService document", e);
+//                                remainingTasks.decrementAndGet();
+//                                onComplete.run();
+//                            }
+//                        });
+//                    }
+//
+//                    // Fetch CarSupply data
+//                    for (String key : car.getCarSupplies().keySet()) {
+//                        int quantity = car.getCarSupplies().get(key);
+//                        helper.runTaskInBackground("CarSupply", "supplyId", key, new FirestoreCallback() {
+//                            @Override
+//                            public void onSuccess(DocumentSnapshot document) {
+//                                if (document != null) {
+//                                    CarSupply carSupply = document.toObject(CarSupply.class);
+//                                    carSupply.setQuantity(quantity);
+//                                    synchronized (carSupplyList) {
+//                                        carSupplyList.add(carSupply);
+//                                    }
+//                                } else {
+//                                    Log.d("Firestore", "No CarSupply document found.");
+//                                }
+//                                remainingTasks.decrementAndGet();
+//                                onComplete.run();
+//                            }
+//
+//                            @Override
+//                            public void onFailure(Exception e) {
+//                                Log.e("Firestore", "Error fetching CarSupply document", e);
+//                                remainingTasks.decrementAndGet();
+//                                onComplete.run();
+//                            }
+//                        });
+//                    }
+//
+//
+//                } else {
+//                    Log.d("Firestore", "No Car document found.");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Exception e) {
+//                Log.e("Firestore", "Error fetching Car document", e);
+//            }
+//        });
+
+
+        Log.i("Firestore", "Number of cars: " + cars.size());
         newCars = new ArrayList<>();
         repairingCars = new ArrayList<>();
         completedCars = new ArrayList<>();
@@ -365,8 +464,8 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             intent.putExtra("RECEIVE_DATE", formatter.format(repairingCars.get(position).getReceiveDate()));
             intent.putExtra("CAR_IMAGE", repairingCars.get(position).getCarImage());
             intent.putExtra("STATE", state);
-            intent.putExtra("CAR_SERVICES", (Serializable) repairingCars.get(position).getCarServices());
-            intent.putExtra("CAR_SUPPLIES", (Serializable) repairingCars.get(position).getCarSupplies());
+            intent.putExtra("CAR_SERVICES", (Serializable) repairingCars.get(position).getCarServiceList());
+            intent.putExtra("CAR_SUPPLIES", (Serializable) repairingCars.get(position).getCarSupplyList());
             startActivity(intent);
         }
     }

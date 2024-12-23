@@ -1,16 +1,20 @@
 package com.example.garagemanagement.Objects;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class CarService implements Serializable {
     private String serviceId;
     private String serviceName;
-    private long price;
+    private Map<String, Long> prices;
 
-    public CarService(String serviceId, String serviceName, long price) {
+    public CarService() {
+    }
+
+    public CarService(String serviceId, String serviceName, Map<String, Long> prices) {
         this.serviceId = serviceId;
         this.serviceName = serviceName;
-        this.price = price;
+        this.prices = prices;
     }
 
     public String getServiceId() {
@@ -29,11 +33,11 @@ public class CarService implements Serializable {
         this.serviceName = serviceName;
     }
 
-    public long getPrice() {
-        return price;
+    public Map<String, Long> getPrices() {
+        return prices;
     }
 
-    public void setPrice(long price) {
-        this.price = price;
+    public void setPrices(Map<String, Long> prices) {
+        this.prices = prices;
     }
 }

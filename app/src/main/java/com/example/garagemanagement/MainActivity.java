@@ -1,7 +1,10 @@
 package com.example.garagemanagement;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -17,15 +20,23 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.adapter.AdapterViewPager;
 import com.example.garagemanagement.fragments.FragmentAccount;
 import com.example.garagemanagement.fragments.FragmentCars;
 import com.example.garagemanagement.fragments.FragmentHome;
 import com.example.garagemanagement.fragments.FragmentPayment;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int TIME_INTERVAL = 2000; // # milliseconds, desired time passed between two back presses.
     private long mBackPressed;
+
+    public static List<Car> cars = new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +128,21 @@ public class MainActivity extends AppCompatActivity {
                 // Go to notification activity
             }
         });
+
+        db.collection("Car")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                cars.add(document.toObject(Car.class));
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
     }
 
     @Override
@@ -127,4 +156,11 @@ public class MainActivity extends AppCompatActivity {
 
         mBackPressed = System.currentTimeMillis();
     }
+
+    public void getCars() {
+        cars = new ArrayList<>();
+
+    }
+
+
 }

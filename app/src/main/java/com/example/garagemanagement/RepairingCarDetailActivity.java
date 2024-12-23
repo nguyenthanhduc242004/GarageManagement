@@ -171,21 +171,21 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
             }
         });
 
-        // CarServiceAdapter
-        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
-        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
-        recyclerViewCarServiceList.setFocusable(false);
-        carServiceAdapter.setData(selectedCarServices);
-        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
+//        // CarServiceAdapter
+//        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), CarServiceAdapter.TYPE_LIST, this);
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+//        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
+//        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
+//        recyclerViewCarServiceList.setFocusable(false);
+//        carServiceAdapter.setData(selectedCarServices);
+//        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
 
 //      SET totalCarServicePrice
-        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
-        for (int i = 0; i < selectedCarServices.size(); i++) {
-            totalCarServicePriceLong += selectedCarServices.get(i).getPrice();
-        }
-        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
+//        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
+//        for (int i = 0; i < selectedCarServices.size(); i++) {
+//            totalCarServicePriceLong += selectedCarServices.get(i).getPrice();
+//        }
+//        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
 
 //        CALL API CAR SERVICES:
         String carServicesJson = "[\n" +
@@ -344,7 +344,7 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
                             boolean checked = checkedServices[i];
                             if (checked) {
                                 selectedCarServices.add(finalCarServices.get(i));
-                                totalPrice += finalCarServices.get(i).getPrice();
+//                                TODO: totalPrice += finalCarServices.get(i).getPrice();
                             }
                         }
                         carServiceAdapter.setData(selectedCarServices);

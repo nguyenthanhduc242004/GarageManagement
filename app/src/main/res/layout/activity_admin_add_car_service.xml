@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".AdminActivities.AdminAddCarBrandActivity"
     android:background="@color/white">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="SỬA HÃNG XE"
+            android:text="THÊM DỊCH VỤ"
             android:textColor="@color/textColor"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -30,58 +31,51 @@
             android:contentDescription="back"
             app:srcCompat="@drawable/baseline_arrow_back_24" />
 
-        <LinearLayout
-            android:id="@+id/oldCarBrandWrapper"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/imageButtonBack"
-            android:layout_marginTop="12dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textColor="@color/textColor"
-                android:textStyle="bold"
-                android:text="Tên cũ: "
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="12dp"/>
-
-            <TextView
-                android:id="@+id/tvOldCarBrand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="oldCarBrandText"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/textColor"/>
-
-        </LinearLayout>
-
         <EditText
-            android:id="@+id/etCarBrand"
+            android:id="@+id/etServiceName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/oldCarBrandWrapper"
+            android:layout_below="@+id/imageButtonBack"
             android:layout_marginBottom="12dp"
             android:layout_marginTop="12dp"
             android:layout_marginHorizontal="4dp"
             android:background="@drawable/rounded_edittext"
-            android:hint="Nhập Hãng Xe"
+            android:hint="Nhập Dịch Vụ"
             android:inputType="textEmailAddress"
             android:padding="12dp"
             android:textColor="@color/textColor"
             android:textColorHint="#aaa" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonEdit"
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/etServiceName"
+            android:layout_marginStart="4dp"
+            android:text="Nhập giá Dịch Vụ theo Loại Xe:"
+            android:textColor="@color/textColor"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewCarServicePrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/etCarBrand"
+            android:layout_below="@+id/textView"
+            android:layout_marginTop="12dp">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAdd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/recyclerViewCarServicePrice"
             android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="12dp"
             android:backgroundTint="@color/white"
             android:paddingVertical="12dp"
-            android:text="Sửa"
+            android:text="Thêm Dịch Vụ"
             android:textColor="@color/textColor"
             android:textSize="16sp"
             app:strokeColor="#000"

@@ -398,20 +398,20 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
         });
 
         // CarServiceAdapter
-        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
-        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
-        recyclerViewCarServiceList.setFocusable(false);
-        carServiceAdapter.setData(selectedCarServices);
-        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
+//        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), CarServiceAdapter.TYPE_LIST, this);
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+//        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
+//        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
+//        recyclerViewCarServiceList.setFocusable(false);
+//        carServiceAdapter.setData(selectedCarServices);
+//        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
 
 //      SET totalCarServicePrice
-        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
-        for (int i = 0; i < selectedCarServices.size(); i++) {
-            totalCarServicePriceLong += selectedCarServices.get(i).getPrice();
-        }
-        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
+//        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
+//        for (int i = 0; i < selectedCarServices.size(); i++) {
+//            totalCarServicePriceLong += selectedCarServices.get(i).getPrice();
+//        }
+//        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
 
 //        ADD CAR SERVICE BUTTON:
         String[] carServiceNames = new String[allCarServices.size()];
@@ -456,24 +456,24 @@ public class UpdateRepairingCarActivity extends AppCompatActivity implements Rec
                 });
 
                 // Set positive/yes button click listener
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which) {
-                        List<CarService> selectedCarServices = new ArrayList<>();
-                        long totalPrice = 0;
-                        for (int i = 0; i < checkedServices.length; i++) {
-                            boolean checked = checkedServices[i];
-                            if (checked) {
-                                selectedCarServices.add(finalCarServices.get(i));
-                                totalPrice += finalCarServices.get(i).getPrice();
-                            }
-                        }
-                        carServiceAdapter.setData(selectedCarServices);
-                        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalPrice)));
-                        totalCarServicePriceLong = totalPrice;
-                        tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
-                    }
-                });
+//                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int which) {
+//                        List<CarService> selectedCarServices = new ArrayList<>();
+//                        long totalPrice = 0;
+//                        for (int i = 0; i < checkedServices.length; i++) {
+//                            boolean checked = checkedServices[i];
+//                            if (checked) {
+//                                selectedCarServices.add(finalCarServices.get(i));
+//                                totalPrice += finalCarServices.get(i).getPrice();
+//                            }
+//                        }
+//                        carServiceAdapter.setData(selectedCarServices);
+//                        totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalPrice)));
+//                        totalCarServicePriceLong = totalPrice;
+//                        tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
+//                    }
+//                });
 
 
                 // Set neutral/cancel button click listener

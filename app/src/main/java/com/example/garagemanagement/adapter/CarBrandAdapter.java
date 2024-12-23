@@ -1,11 +1,13 @@
 package com.example.garagemanagement.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,9 +16,14 @@ import com.example.garagemanagement.AdminActivities.AdminEditCarBrandActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.CarBrand;
 import com.example.garagemanagement.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CarBrandAdapter extends RecyclerView.Adapter<CarBrandAdapter.CarBrandViewHolder> {
     private final RecyclerViewInterface recyclerViewInterface;
@@ -54,13 +61,42 @@ public class CarBrandAdapter extends RecyclerView.Adapter<CarBrandAdapter.CarBra
                 intent.putExtra("CAR_BRAND_ID", carBrand.getCarBrandId());
                 intent.putExtra("CAR_BRAND_TEXT", carBrand.getCarBrandText());
                 context.startActivity(intent);
-
             }
         });
         holder.buttonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: DO SOMETHING HERE!!!
+                ConfirmationDialog.showConfirmationDialog(context, "Xác nhận xóa!",
+                        "Bạn sẽ không thể hoàn tác sau khi thực hiện hành động này.", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                Map<String, Object> carBrandData = new HashMap<>();
+                                carBrandData.put("carBrandText", carBrand.getCarBrandText());
+                                carBrandData.put("usable", false);
+                                db.collection("CarBrand")
+                                        .document(carBrand.getCarBrandId())
+                                        .update(carBrandData)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Toast.makeText(context, "Xóa hãng xe thành công!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(context, "Xóa hãng xe không thành công!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        }, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Perform actions when the user confirms
+                                // (e.g., delete data, proceed with an action)
+                            }
+                        });
             }
         });
     }

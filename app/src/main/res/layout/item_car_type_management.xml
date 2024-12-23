@@ -12,7 +12,7 @@
         android:paddingVertical="6dp"
         android:background="@drawable/square_border">
         <TextView
-            android:id="@+id/tvCarType"
+            android:id="@+id/tvCarTypeText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Tên Loại Xe"

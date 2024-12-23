@@ -1,10 +1,13 @@
 package com.example.garagemanagement.AdminActivities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -15,15 +18,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.CarBrand;
 import com.example.garagemanagement.Objects.CarSupply;
+import com.example.garagemanagement.Objects.CarType;
 import com.example.garagemanagement.R;
 import com.example.garagemanagement.adapter.CarBrandAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AdminCarSupplyManagementActivity extends AppCompatActivity implements RecyclerViewInterface {
     CarSupplyAdapter carSupplyAdapter;
+    FirebaseFirestore db;
+    List<CarSupply> carSupplies = new ArrayList<>();
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +56,10 @@ public class AdminCarSupplyManagementActivity extends AppCompatActivity implemen
             finish();
         });
 
-        CarSupply carSupply1 = new CarSupply("1", "Dung dịch phụ gia súc béc xăng (Wurth)", 300000);
-        CarSupply carSupply2 = new CarSupply("2", "Dung dịch phụ gia súc nhớt (Wurth)", 300000);
-        CarSupply carSupply3 = new CarSupply("3", "Dung dịch vệ sinh kim phun (Wurth)", 350000);
-        CarSupply carSupply4 = new CarSupply("4", "Nước làm mát (Asin, Jinco)", 150000);
-        CarSupply carSupply5 = new CarSupply("5", "Còi Denso", 500000);
-        CarSupply carSupply6 = new CarSupply("6", "Gạt mưa Bosch cứng", 350000);
-        CarSupply carSupply7 = new CarSupply("7", "Gạt mưa Bosch mềm", 600000);
-        List<CarSupply> carSupplies = List.of(carSupply1, carSupply2, carSupply3, carSupply4, carSupply5, carSupply6, carSupply7);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Đang tải...");
+        progressDialog.show();
 
         carSupplyAdapter = new CarSupplyAdapter(this, CarSupplyAdapter.TYPE_MANAGEMENT, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -57,6 +67,9 @@ public class AdminCarSupplyManagementActivity extends AppCompatActivity implemen
         recyclerViewCarSupplyManagement.setLayoutManager(linearLayoutManager);
         recyclerViewCarSupplyManagement.setFocusable(false);
         recyclerViewCarSupplyManagement.setAdapter(carSupplyAdapter);
+
+        db = FirebaseFirestore.getInstance();
+        EventChangeListener();
         carSupplyAdapter.setData(carSupplies);
 
         MaterialButton buttonAdd = findViewById(R.id.buttonAdd);
@@ -64,6 +77,52 @@ public class AdminCarSupplyManagementActivity extends AppCompatActivity implemen
             Intent intent = new Intent(AdminCarSupplyManagementActivity.this, AdminAddCarSupplyActivity.class);
             startActivity(intent);
         });
+    }
+
+    private void EventChangeListener() {
+        db.collection("CarSupply")
+            .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                    if (error != null) {
+                        if (progressDialog.isShowing())
+                            progressDialog.dismiss();
+                        Log.e("Firestore error", error.getMessage());
+                        return;
+                    }
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        QueryDocumentSnapshot document = dc.getDocument();
+                        DocumentChange.Type type = dc.getType();
+                        Boolean usable = document.getBoolean("usable");
+                        CarSupply carSupply = document.toObject(CarSupply.class);
+                        carSupply.setSupplyId(document.getId());
+                        if (type == DocumentChange.Type.ADDED) {
+                            if (usable) {
+                                carSupplies.add(carSupply);
+                            }
+                        } else if (type == DocumentChange.Type.MODIFIED) {
+                            boolean isFound = false;
+                            for (int i = 0; i < carSupplies.size(); i++) {
+                                if (carSupplies.get(i).getSupplyId().equals(carSupply.getSupplyId())) {
+                                    isFound = true;
+                                    if (usable) {
+                                        carSupplies.set(i, carSupply);
+                                    } else {
+                                        carSupplies.remove(i);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!isFound && usable) {
+                                carSupplies.add(carSupply);
+                            }
+                        }
+                        carSupplyAdapter.setData(carSupplies);
+                        if (progressDialog.isShowing())
+                            progressDialog.dismiss();
+                    }
+                }
+            });
     }
 
     @Override

@@ -254,16 +254,16 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
 //                TODO: CALL API CAR SERVICES BASES ON CAR TYPE
 //                TODO: THEN SET DATA TO CAR SERVICE ADAPTER
 //                TODO: THEN SET DATA TO allCarServices
-                    carServiceAdapter.setData(currentCar.getCarServices());
-                    carSupplyAdapter.setData(currentCar.getCarSupplies());
+                    carServiceAdapter.setData(currentCar.getCarServiceList());
+                    carSupplyAdapter.setData(currentCar.getCarSupplyList());
                     totalCarSupplyPriceLong = 0;
-                    for (int j = 0; j < currentCar.getCarSupplies().size(); j++) {
-                        totalCarSupplyPriceLong += currentCar.getCarSupplies().get(j).getPrice();
+                    for (int j = 0; j < currentCar.getCarSupplyList().size(); j++) {
+                        totalCarSupplyPriceLong += currentCar.getCarSupplyList().get(j).getPrice();
                     }
                     totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarSupplyPriceLong)));
                     totalCarServicePriceLong = 0;
-                    for (int j = 0; j < currentCar.getCarServices().size(); j++) {
-                        totalCarServicePriceLong += currentCar.getCarServices().get(j).getPrice();
+                    for (int j = 0; j < currentCar.getCarServiceList().size(); j++) {
+//                        TODO: totalCarServicePriceLong += currentCar.getCarServiceList().get(j).getPrices().get();
                     }
                     totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
                     tvTotalPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong + totalCarSupplyPriceLong)));
@@ -311,91 +311,91 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         });
 
 //        CarServiceAdapter
-        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), this);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
-        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
-        recyclerViewCarServiceList.setFocusable(false);
-        carServiceAdapter.setData(new ArrayList<>());
-        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
+//        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), CarServiceAdapter.TYPE_LIST,  this);
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+//        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
+//        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
+//        recyclerViewCarServiceList.setFocusable(false);
+//        carServiceAdapter.setData(new ArrayList<>());
+//        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
 
 //        ADD CAR SERVICE BUTTON:
         // TODO: CALL API PROPERLY
         // FAKE CALL API SERVICE LIST:
-        CarService carService1 = new CarService("1", "Bảo dưỡng cấp nhỏ (5000) KM", 149000);
-        CarService carService2 = new CarService("2", "Bảo dưỡng cấp trung bình (10.000) KM", 299000);
-        CarService carService3 = new CarService("3", "Bảo dưỡng cấp trung bình lớn (20.000) KM", 399000);
-        CarService carService4 = new CarService("4", "Bảo dưỡng cấp lớn (40.000) KM", 799000);
-        CarService carService5 = new CarService("5", "Bảo dưỡng phanh 4 bánh", 500000);
-        CarService carService6 = new CarService("6", "Vệ sinh kim phun (bao gồm dung dịch kèm theo)", 660000);
-        CarService carService7 = new CarService("7", "Kiểm tra hệ thống giảm", 350000);
-        CarService carService8 = new CarService("8", "Kiểm tra hệ thống điện chuyên sâu", 1200000);
-        CarService carService9 = new CarService("9", "Kiểm tra tổng quát", 600000);
-        CarService carService10 = new CarService("10", "Cân bằng động (100k/ bánh)", 400000);
-        CarService carService11 = new CarService("11", "Cân chỉnh độ chụm", 500000);
-        List<CarService> carServices = List.of(carService1, carService2, carService3, carService4, carService5, carService6, carService7, carService8, carService9, carService10, carService11);
+//        CarService carService1 = new CarService("1", "Bảo dưỡng cấp nhỏ (5000) KM", 149000);
+//        CarService carService2 = new CarService("2", "Bảo dưỡng cấp trung bình (10.000) KM", 299000);
+//        CarService carService3 = new CarService("3", "Bảo dưỡng cấp trung bình lớn (20.000) KM", 399000);
+//        CarService carService4 = new CarService("4", "Bảo dưỡng cấp lớn (40.000) KM", 799000);
+//        CarService carService5 = new CarService("5", "Bảo dưỡng phanh 4 bánh", 500000);
+//        CarService carService6 = new CarService("6", "Vệ sinh kim phun (bao gồm dung dịch kèm theo)", 660000);
+//        CarService carService7 = new CarService("7", "Kiểm tra hệ thống giảm", 350000);
+//        CarService carService8 = new CarService("8", "Kiểm tra hệ thống điện chuyên sâu", 1200000);
+//        CarService carService9 = new CarService("9", "Kiểm tra tổng quát", 600000);
+//        CarService carService10 = new CarService("10", "Cân bằng động (100k/ bánh)", 400000);
+//        CarService carService11 = new CarService("11", "Cân chỉnh độ chụm", 500000);
+//        List<CarService> carServices = List.of(carService1, carService2, carService3, carService4, carService5, carService6, carService7, carService8, carService9, carService10, carService11);
 
-        String[] carServiceNames = new String[carServices.size()];
-        for (int i = 0; i < carServices.size(); i++) {
-            carServiceNames[i] = carServices.get(i).getServiceName();
-        }
-
-        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
-        boolean[] checkedServices = new boolean[carServices.size()];
-        Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
-        List<CarService> finalCarServices = carServices;
-        addCarServiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(AddRepairCardActivity.this);
-                builder.setTitle("Chọn Dịch Vụ");
-                builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
-                        // Update current focused item's checked status
-                        checkedServices[which] = isChecked;
-                        // Get the current focused item
-                        // CarService currentItem = finalCarServices.get(which);
-                        // Notify the current action
-                        // Toast.makeText(AddRepairCardActivity.this, currentItem.getServiceName() + " " + isChecked, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                // Set positive/yes button click listener
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int which) {
-                        List<CarService> selectedCarServices = new ArrayList<>();
-                        long totalPrice = 0;
-                        for (int i = 0; i < checkedServices.length; i++) {
-                            boolean checked = checkedServices[i];
-                            if (checked) {
-                                selectedCarServices.add(finalCarServices.get(i));
-                                totalPrice += finalCarServices.get(i).getPrice();
-                            }
-                        }
-                        carServiceAdapter.setData(selectedCarServices);
-                        totalCarServicePrice.setText("Tổng: " + currencyFormatter.format(totalPrice) + "đ");
-                        totalCarServicePriceLong = totalPrice;
-                        tvTotalPrice.setText("Tổng tiền: " + currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong) + "đ");
-                    }
-                });
-
-
-                // Set neutral/cancel button click listener
-                builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        // Do something here
-                    }
-                });
-
-                AlertDialog alertDialog = builder.create();
-                // Show alert dialog
-                alertDialog.show();
-            }
-        });
+//        String[] carServiceNames = new String[carServices.size()];
+//        for (int i = 0; i < carServices.size(); i++) {
+//            carServiceNames[i] = carServices.get(i).getServiceName();
+//        }
+//
+//        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
+//        boolean[] checkedServices = new boolean[carServices.size()];
+//        Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
+//        List<CarService> finalCarServices = carServices;
+//        addCarServiceButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                AlertDialog.Builder builder = new AlertDialog.Builder(AddRepairCardActivity.this);
+//                builder.setTitle("Chọn Dịch Vụ");
+//                builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
+//                        // Update current focused item's checked status
+//                        checkedServices[which] = isChecked;
+//                        // Get the current focused item
+//                        // CarService currentItem = finalCarServices.get(which);
+//                        // Notify the current action
+//                        // Toast.makeText(AddRepairCardActivity.this, currentItem.getServiceName() + " " + isChecked, Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//
+//                // Set positive/yes button click listener
+//                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int which) {
+//                        List<CarService> selectedCarServices = new ArrayList<>();
+//                        long totalPrice = 0;
+//                        for (int i = 0; i < checkedServices.length; i++) {
+//                            boolean checked = checkedServices[i];
+//                            if (checked) {
+//                                selectedCarServices.add(finalCarServices.get(i));
+//                                totalPrice += finalCarServices.get(i).getPrice();
+//                            }
+//                        }
+//                        carServiceAdapter.setData(selectedCarServices);
+//                        totalCarServicePrice.setText("Tổng: " + currencyFormatter.format(totalPrice) + "đ");
+//                        totalCarServicePriceLong = totalPrice;
+//                        tvTotalPrice.setText("Tổng tiền: " + currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong) + "đ");
+//                    }
+//                });
+//
+//
+//                // Set neutral/cancel button click listener
+//                builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        // Do something here
+//                    }
+//                });
+//
+//                AlertDialog alertDialog = builder.create();
+//                // Show alert dialog
+//                alertDialog.show();
+//            }
+//        });
 
 //        TOGGLE CAR SUPPLY LIST BUTTON:
         LinearLayout carSupplyWrapper = findViewById(R.id.car_supply_wrapper);

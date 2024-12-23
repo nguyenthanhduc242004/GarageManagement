@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -20,10 +19,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
-import com.example.garagemanagement.Objects.CarBrand;
 import com.example.garagemanagement.Objects.CarService;
+import com.example.garagemanagement.Objects.CarType;
 import com.example.garagemanagement.R;
 import com.example.garagemanagement.adapter.CarServiceAdapter;
+import com.example.garagemanagement.adapter.CarTypeAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
@@ -40,21 +40,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AdminAddCarTypeActivity extends AppCompatActivity implements RecyclerViewInterface {
+public class AdminAddCarServiceActivity extends AppCompatActivity implements RecyclerViewInterface {
     FirebaseFirestore db;
-    CarServiceAdapter carServiceAdapter;
-    List<CarService> carServices = new ArrayList<>();
+    CarTypeAdapter carTypeAdapter;
+    RecyclerView recyclerViewCarServicePrice;
+    List<CarType> carTypes = new ArrayList<>();
     ProgressDialog progressDialog;
     MaterialButton buttonAdd;
-    RecyclerView recyclerViewCarTypePrice;
-    Map<String, Long> serviceIdAndPrice = new HashMap<>();
-
+    Map<String, Long> newPrices = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_admin_add_car_type);
+        setContentView(R.layout.activity_admin_add_car_service);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -72,32 +71,32 @@ public class AdminAddCarTypeActivity extends AppCompatActivity implements Recycl
         progressDialog.setMessage("Đang tải...");
         progressDialog.show();
 
-        carServiceAdapter = new CarServiceAdapter(this,CarServiceAdapter.TYPE_CAR_TYPE_PRICE, null, this);
+
+        carTypeAdapter = new CarTypeAdapter(this, CarTypeAdapter.TYPE_CAR_SERVICE_PRICE, null, this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerViewCarTypePrice = findViewById(R.id.recyclerViewCarTypePrice);
-        recyclerViewCarTypePrice.setLayoutManager(linearLayoutManager);
-        recyclerViewCarTypePrice.setFocusable(false);
-        recyclerViewCarTypePrice.setAdapter(carServiceAdapter);
+        recyclerViewCarServicePrice = findViewById(R.id.recyclerViewCarServicePrice);
+        recyclerViewCarServicePrice.setLayoutManager(linearLayoutManager);
+        recyclerViewCarServicePrice.setFocusable(false);
+        recyclerViewCarServicePrice.setAdapter(carTypeAdapter);
 
         db = FirebaseFirestore.getInstance();
         EventChangeListener();
-        carServiceAdapter.setData(carServices);
+        carTypeAdapter.setData(carTypes);
 
-
-        EditText etCarType = findViewById(R.id.etCarType);
+        EditText etServiceName = findViewById(R.id.etServiceName);
         buttonAdd = findViewById(R.id.buttonAdd);
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean isSubmittable = true;
 
-                if (etCarType.getText().toString().isEmpty()) {
-                    etCarType.setError("Vui lòng nhập Loại Xe!");
+                if (etServiceName.getText().toString().isEmpty()) {
+                    etServiceName.setError("Vui lòng nhập Dịch Vụ!");
                     isSubmittable = false;
                 }
 
-                for (int i = 0; i < carServices.size(); i++) {
-                    View itemView = recyclerViewCarTypePrice.getChildAt(i);
+                for (int i = 0; i < carTypes.size(); i++) {
+                    View itemView = recyclerViewCarServicePrice.getChildAt(i);
                     if (itemView != null) {
                         EditText etPrice = itemView.findViewById(R.id.etPrice);
                         String priceString = etPrice.getText().toString();
@@ -107,7 +106,7 @@ public class AdminAddCarTypeActivity extends AppCompatActivity implements Recycl
                             continue;
                         }
                         Long priceLong = Long.parseLong(priceString);
-                        serviceIdAndPrice.put(carServices.get(i).getServiceId(), priceLong);
+                        newPrices.put(carTypes.get(i).getCarTypeId(), priceLong);
                     }
                 }
 
@@ -116,50 +115,23 @@ public class AdminAddCarTypeActivity extends AppCompatActivity implements Recycl
                 }
 
                 db = FirebaseFirestore.getInstance();
-                Map<String, Object> carTypeData = new HashMap<>();
-                carTypeData.put("carTypeText", etCarType.getText().toString());
-                carTypeData.put("usable", true);
+                Map<String, Object> carServiceData = new HashMap<>();
+                carServiceData.put("serviceName", etServiceName.getText().toString());
+                carServiceData.put("prices", newPrices);
+                carServiceData.put("usable", true);
 
-//                 Add a new document with a generated ID
-                db.collection("CarType")
-                        .add(carTypeData)
+                db.collection("CarService")
+                        .add(carServiceData)
                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
-//                                Toast.makeText(AdminAddCarTypeActivity.this, "Thêm loại xe thành công!", Toast.LENGTH_SHORT).show();
-                                for (String serviceId : serviceIdAndPrice.keySet()) {
-                                    for (int i = 0; i < carServices.size(); i++) {
-                                        CarService currentCarService = carServices.get(i);
-                                        if (serviceId.equals(currentCarService.getServiceId())) {
-                                            Map<String, Long> newPrices = currentCarService.getPrices();
-                                            newPrices.put(documentReference.getId(), serviceIdAndPrice.get(serviceId));
-                                            carServices.get(i).setPrices(newPrices);
-                                        }
-                                    }
-                                }
-
-                                for (int i = 0; i < carServices.size(); i++) {
-                                    CarService currentCarService = carServices.get(i);
-                                    Map<String, Object> carServiceData = new HashMap<>();
-                                    carServiceData.put("serviceName", currentCarService.getServiceName());
-                                    carServiceData.put("prices", currentCarService.getPrices());
-                                    carServiceData.put("usable", true);
-                                    db.collection("CarService")
-                                            .document(currentCarService.getServiceId())
-                                            .update(carServiceData)
-                                            .addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    Toast.makeText(AdminAddCarTypeActivity.this, "Thêm loại xe không thành công!", Toast.LENGTH_SHORT).show();
-                                                }
-                                            });
-                                }
+                                Toast.makeText(AdminAddCarServiceActivity.this, "Thêm dịch vụ thành công!", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(AdminAddCarTypeActivity.this, "Thêm loại xe không thành công!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AdminAddCarServiceActivity.this, "Thêm dịch vụ không thành công!", Toast.LENGTH_SHORT).show();
                             }
                         });
                 finish();
@@ -168,8 +140,8 @@ public class AdminAddCarTypeActivity extends AppCompatActivity implements Recycl
     }
 
     private void EventChangeListener() {
-        db.collection("CarService")
-                .orderBy("serviceName")
+        db.collection("CarType")
+                .orderBy("carTypeText")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -183,30 +155,30 @@ public class AdminAddCarTypeActivity extends AppCompatActivity implements Recycl
                             QueryDocumentSnapshot document = dc.getDocument();
                             DocumentChange.Type type = dc.getType();
                             Boolean usable = document.getBoolean("usable");
-                            CarService carService = document.toObject(CarService.class);
-                            carService.setServiceId(document.getId());
+                            CarType carType = document.toObject(CarType.class);
+                            carType.setCarTypeId(document.getId());
                             if (type == DocumentChange.Type.ADDED) {
                                 if (usable) {
-                                    carServices.add(carService);
+                                    carTypes.add(carType);
                                 }
                             } else if (type == DocumentChange.Type.MODIFIED) {
                                 boolean isFound = false;
-                                for (int i = 0; i < carServices.size(); i++) {
-                                    if (carServices.get(i).getServiceId().equals(carService.getServiceId())) {
+                                for (int i = 0; i < carTypes.size(); i++) {
+                                    if (carTypes.get(i).getCarTypeId().equals(carType.getCarTypeId())) {
                                         isFound = true;
                                         if (usable) {
-                                            carServices.set(i, carService);
+                                            carTypes.set(i, carType);
                                         } else {
-                                            carServices.remove(i);
+                                            carTypes.remove(i);
                                         }
                                         break;
                                     }
                                 }
                                 if (!isFound && usable) {
-                                    carServices.add(carService);
+                                    carTypes.add(carType);
                                 }
                             }
-                            carServiceAdapter.setData(carServices);
+                            carTypeAdapter.setData(carTypes);
                             if (progressDialog.isShowing())
                                 progressDialog.dismiss();
                         }

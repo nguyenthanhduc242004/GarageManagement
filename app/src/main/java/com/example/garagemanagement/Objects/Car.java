@@ -2,6 +2,7 @@ package com.example.garagemanagement.Objects;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class Car {
     public static final int STATE_NEW = 0;
@@ -19,9 +20,14 @@ public class Car {
     private Date receiveDate;
     private int carImage;
     private int state;
-    private List<CarService> carServices;
-    private List<CarSupply> carSupplies;
+    private List<CarService> carServiceList;
+    private List<CarSupply> carSupplyList;
+    private List<String> carServices;
+    private Map<String, Integer> carSupplies;
     private Date paymentDate;
+
+    public Car() {
+    }
 
     public Car(String ownerName, String licensePlate, String carBrandId, String carBrandText, String carTypeId, String carTypeText, String phoneNumber, Date receiveDate, int carImage, int state) {
         this.ownerName = ownerName;
@@ -36,7 +42,23 @@ public class Car {
         this.state = state;
     }
 
-    public Car(String ownerName, String licensePlate, String carBrandId, String carBrandText, String carTypeId, String carTypeText, String phoneNumber, Date receiveDate, int carImage, int state, List<CarService> carServices, List<CarSupply> carSupplies) {
+    public Car(String ownerName, String licensePlate, String carBrandId, String carBrandText, String carTypeId, String carTypeText, String phoneNumber, Date receiveDate, int carImage, int state, List<CarService> carServiceList, List<CarSupply> carSupplyList) {
+        this.ownerName = ownerName;
+        this.licensePlate = licensePlate;
+        this.carBrandId = carBrandId;
+        this.carBrandText = carBrandText;
+        this.carTypeId = carTypeId;
+        this.carTypeText = carTypeText;
+        this.phoneNumber = phoneNumber;
+        this.receiveDate = receiveDate;
+        this.carImage = carImage;
+        this.state = state;
+        this.carServiceList = carServiceList;
+        this.carSupplyList = carSupplyList;
+    }
+
+    public Car(String carId, String ownerName, String licensePlate, String carBrandId, String carBrandText, String carTypeId, String carTypeText, String phoneNumber, Date receiveDate, int carImage, int state, List<String> carServices, Map<String, Integer> carSupplies) {
+        this.carId = carId;
         this.ownerName = ownerName;
         this.licensePlate = licensePlate;
         this.carBrandId = carBrandId;
@@ -49,6 +71,23 @@ public class Car {
         this.state = state;
         this.carServices = carServices;
         this.carSupplies = carSupplies;
+    }
+
+    public Car(String carId, String ownerName, String licensePlate, String carBrandId, String carBrandText, String carTypeId, String carTypeText, String phoneNumber, Date receiveDate, int carImage, int state, List<String> carServices, Map<String, Integer> carSupplies, Date paymentDate) {
+        this.carId = carId;
+        this.ownerName = ownerName;
+        this.licensePlate = licensePlate;
+        this.carBrandId = carBrandId;
+        this.carBrandText = carBrandText;
+        this.carTypeId = carTypeId;
+        this.carTypeText = carTypeText;
+        this.phoneNumber = phoneNumber;
+        this.receiveDate = receiveDate;
+        this.carImage = carImage;
+        this.state = state;
+        this.carServices = carServices;
+        this.carSupplies = carSupplies;
+        this.paymentDate = paymentDate;
     }
 
     public String getCarId() {
@@ -123,20 +162,20 @@ public class Car {
         this.state = state;
     }
 
-    public List<CarService> getCarServices() {
-        return carServices;
+    public List<CarService> getCarServiceList() {
+        return carServiceList;
     }
 
-    public void setCarServices(List<CarService> carServices) {
-        this.carServices = carServices;
+    public void setCarServiceList(List<CarService> carServiceList) {
+        this.carServiceList = carServiceList;
     }
 
-    public List<CarSupply> getCarSupplies() {
-        return carSupplies;
+    public List<CarSupply> getCarSupplyList() {
+        return carSupplyList;
     }
 
-    public void setCarSupplies(List<CarSupply> carSupplies) {
-        this.carSupplies = carSupplies;
+    public void setCarSupplyList(List<CarSupply> carSupplyList) {
+        this.carSupplyList = carSupplyList;
     }
 
     public String getCarBrandId() {
@@ -161,5 +200,21 @@ public class Car {
 
     public void setPaymentDate(Date paymentDate) {
         this.paymentDate = paymentDate;
+    }
+
+    public List<String> getCarServices() {
+        return carServices;
+    }
+
+    public void setCarServices(List<String> carServices) {
+        this.carServices = carServices;
+    }
+
+    public Map<String, Integer> getCarSupplies() {
+        return carSupplies;
+    }
+
+    public void setCarSupplies(Map<String, Integer> carSupplies) {
+        this.carSupplies = carSupplies;
     }
 }

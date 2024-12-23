@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="QUẢN LÝ LOẠI XE"
+            android:text="QUẢN LÝ DỊCH VỤ"
             android:textColor="@color/textColor"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -46,7 +46,7 @@
             android:paddingVertical="8dp"
             app:strokeWidth="2dp"
             app:strokeColor="@color/textColor"
-            android:text="Thêm Loại Xe"
+            android:text="Thêm Dịch Vụ"
             android:textColor="@color/textColor"
             android:backgroundTint="@color/white"
             android:textStyle="bold"
@@ -85,7 +85,7 @@
                 android:layout_gravity="center_vertical"/>
         </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewCarBrandManagement"
+            android:id="@+id/recyclerViewCarServiceManagement"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/header">

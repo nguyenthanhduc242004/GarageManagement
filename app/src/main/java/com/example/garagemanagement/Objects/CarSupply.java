@@ -8,6 +8,9 @@ public class CarSupply implements Serializable {
     private long price;
     private int quantity = 0;
 
+    public CarSupply() {
+    }
+
     public CarSupply(String supplyId, String supplyName, long price) {
         this.supplyId = supplyId;
         this.supplyName = supplyName;

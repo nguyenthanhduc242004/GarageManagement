@@ -6,6 +6,9 @@ public class CarBrand {
     private String carBrandId;
     private String carBrandText;
 
+    public CarBrand() {
+    }
+
     public CarBrand(String carBrandId, String carBrandText) {
         this.carBrandId = carBrandId;
         this.carBrandText = carBrandText;
