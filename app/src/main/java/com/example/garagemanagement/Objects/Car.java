@@ -1,10 +1,17 @@
 package com.example.garagemanagement.Objects;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Car {
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     public static final int STATE_NEW = 0;
     public static final int STATE_REPAIRING = 1;
     public static final int STATE_COMPLETED = 2;
@@ -20,10 +27,10 @@ public class Car {
     private Date receiveDate;
     private int carImage;
     private int state;
-    private List<CarService> carServiceList;
-    private List<CarSupply> carSupplyList;
-    private List<String> carServices;
-    private Map<String, Integer> carSupplies;
+    private List<CarService> carServiceList = new ArrayList<>();
+    private List<CarSupply> carSupplyList = new ArrayList<>();
+    private List<String> carServices= new ArrayList<>();
+    private Map<String, Integer> carSupplies = new HashMap<>();
     private Date paymentDate;
 
     public Car() {
@@ -81,6 +88,21 @@ public class Car {
         this.carBrandText = carBrandText;
         this.carTypeId = carTypeId;
         this.carTypeText = carTypeText;
+        this.phoneNumber = phoneNumber;
+        this.receiveDate = receiveDate;
+        this.carImage = carImage;
+        this.state = state;
+        this.carServices = carServices;
+        this.carSupplies = carSupplies;
+        this.paymentDate = paymentDate;
+    }
+
+    public Car(String carId, String ownerName, String licensePlate, String carBrandId, String carTypeId, String phoneNumber, Date receiveDate, int carImage, int state, List<String> carServices, Map<String, Integer> carSupplies, Date paymentDate) {
+        this.carId = carId;
+        this.ownerName = ownerName;
+        this.licensePlate = licensePlate;
+        this.carBrandId = carBrandId;
+        this.carTypeId = carTypeId;
         this.phoneNumber = phoneNumber;
         this.receiveDate = receiveDate;
         this.carImage = carImage;

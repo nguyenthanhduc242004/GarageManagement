@@ -22,6 +22,12 @@ public class CarSpinnerAdapter extends ArrayAdapter<Car> {
         super(context, resource, objects);
     }
 
+    @Override
+    public void add(@Nullable Car object) {
+        super.add(object);
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

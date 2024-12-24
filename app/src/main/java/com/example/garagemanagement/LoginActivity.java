@@ -34,9 +34,6 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        Intent intent2 = new Intent(LoginActivity.this, AdminHomeActivity.class);
-        startActivity(intent2);
-
         // Initialize views
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);

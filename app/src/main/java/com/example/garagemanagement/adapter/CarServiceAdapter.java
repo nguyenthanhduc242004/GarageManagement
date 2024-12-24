@@ -87,6 +87,7 @@ public class CarServiceAdapter extends RecyclerView.Adapter<CarServiceAdapter.Ca
         holder.tvServiceName.setText(carService.getServiceName());
         int type = holder.getItemViewType();
         if (type == TYPE_LIST) {
+            holder.tvServiceId.setText(String.valueOf(position + 1));
             holder.tvPrice.setText(String.format("%sđ", formatter.format(carService.getPrices().get(carTypeId))));
         } else if (type == TYPE_MANAGEMENT) {
             holder.buttonEdit.setOnClickListener(new View.OnClickListener() {

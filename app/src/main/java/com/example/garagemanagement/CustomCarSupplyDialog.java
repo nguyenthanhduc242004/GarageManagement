@@ -26,6 +26,7 @@ import java.util.List;
 
 public class CustomCarSupplyDialog extends AppCompatDialogFragment implements RecyclerViewInterface {
     CustomCarSupplyDialogInterface customCarSupplyDialogInterface;
+    public static List<CarSupply> allCarSupplies = new ArrayList<>();
 
     @NonNull
     @Override

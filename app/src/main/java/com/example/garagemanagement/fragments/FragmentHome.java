@@ -1,22 +1,29 @@
 package com.example.garagemanagement.fragments;
 
+import static com.example.garagemanagement.MainActivity.mainProgressDialog;
+
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.example.garagemanagement.AddCarActivity;
 import com.example.garagemanagement.AddRepairCardActivity;
-import com.example.garagemanagement.FirestoreHelper;
 import com.example.garagemanagement.MainActivity;
 import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
@@ -26,10 +33,15 @@ import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.R;
 import com.example.garagemanagement.RepairingCarDetailActivity;
 import com.example.garagemanagement.adapter.CarAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -38,9 +50,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -48,6 +62,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * create an instance of this fragment.
  */
 public class FragmentHome extends Fragment implements RecyclerViewInterface {
+    FirebaseFirestore db;
+    ProgressDialog progressDialog;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -60,11 +76,15 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
     List<Car> cars = new ArrayList<>();
-    List<Car> newCars = new ArrayList<>();
+    public static List<Car> newCars = new ArrayList<>();
     List<Car> repairingCars = new ArrayList<>();
     List<Car> completedCars = new ArrayList<>();
 
-    FirebaseFirestore db;
+    CarAdapter newCarsAdapter;
+    CarAdapter repairingCarsAdapter;
+    CarAdapter completedCarsAdapter;
+
+    RecyclerView recyclerViewNewCars;
 
     public static int selectedState = -1;
 
@@ -99,11 +119,64 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         }
     }
 
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        cars = MainActivity.cars;
+//        newCars = new ArrayList<>();
+//        repairingCars = new ArrayList<>();
+//        completedCars = new ArrayList<>();
+//
+//        for (int i = 0; i < cars.size(); i++) {
+//            int state = cars.get(i).getState();
+//            if (state == 0) {
+//                newCars.add(cars.get(i));
+//            }
+//            else if (state == 1) {
+//                repairingCars.add(cars.get(i));
+//            }
+//            else if (state == 2) {
+//                completedCars.add(cars.get(i));
+//            }
+//        }
+//        newCarsAdapter.setData(newCars);
+//        repairingCarsAdapter.setData(repairingCars);
+//        completedCarsAdapter.setData(completedCars);
+//    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+
+//        New Car RecyclerView:
+        newCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
+        GridLayoutManager gridLayoutManager1 = new GridLayoutManager(getContext(), 2);
+        recyclerViewNewCars = view.findViewById(R.id.recyclerViewNewCars);
+        recyclerViewNewCars.setLayoutManager(gridLayoutManager1);
+        recyclerViewNewCars.setFocusable(false);
+        recyclerViewNewCars.setNestedScrollingEnabled(false);
+        recyclerViewNewCars.setAdapter(newCarsAdapter);
+
+//        Repairing Car RecyclerView:
+        repairingCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
+        GridLayoutManager gridLayoutManager2 = new GridLayoutManager(getContext(), 2);
+        RecyclerView recyclerViewRepairingCars = view.findViewById(R.id.recyclerViewRepairingCars);
+        recyclerViewRepairingCars.setLayoutManager(gridLayoutManager2);
+        recyclerViewRepairingCars.setFocusable(false);
+        recyclerViewRepairingCars.setNestedScrollingEnabled(false);
+        recyclerViewRepairingCars.setAdapter(repairingCarsAdapter);
+
+//        Completed Car RecyclerView:
+        completedCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
+        GridLayoutManager gridLayoutManager3 = new GridLayoutManager(getContext(), 2);
+        RecyclerView recyclerViewCompletedCars = view.findViewById(R.id.recyclerViewCompletedCars);
+        recyclerViewCompletedCars.setLayoutManager(gridLayoutManager3);
+        recyclerViewCompletedCars.setFocusable(false);
+        recyclerViewCompletedCars.setNestedScrollingEnabled(false);
+        recyclerViewCompletedCars.setAdapter(completedCarsAdapter);
 
         ImageButton imageButtonAddCar = view.findViewById(R.id.imageButtonAddCar);
         imageButtonAddCar.setOnClickListener(new View.OnClickListener() {
@@ -123,265 +196,13 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             }
         });
 
+        progressDialog = new ProgressDialog(getContext());
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Đang tải...");
+        progressDialog.show();
 
-        String json = "[\n" +
-                "  {\n" +
-                "    \"carId\": 1,\n" +
-                "    \"licensePlate\": \"29A-123.45\",\n" +
-                "    \"ownerName\": \"Nguyễn Thị Linh\",\n" +
-                "    \"carBrandId\": 1,\n" +
-                "    \"carBrandText\": \"Honda\",\n" +
-                "    \"carTypeId\": 1,\n" +
-                "    \"carTypeText\": \"Mini\",\n" +
-                "    \"phoneNumber\": \"0901234567\",\n" +
-                "    \"receiveDate\": \"2024, 02, 14\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 0,\n" +
-                "    \"carServices\": [],\n" +
-                "    \"carSupplies\": []\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 2,\n" +
-                "    \"licensePlate\": \"51F-987.65\",\n" +
-                "    \"ownerName\": \"Trần Minh Phúc\",\n" +
-                "    \"carBrandId\": 2,\n" +
-                "    \"carBrandText\": \"Aston Martin\",\n" +
-                "    \"carTypeId\": 2,\n" +
-                "    \"carTypeText\": \"Sedan\",\n" +
-                "    \"phoneNumber\": \"0987654321\",\n" +
-                "    \"receiveDate\": \"2024, 04, 10\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 1,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"3\", \"serviceName\": \"BẢO DƯỠNG CẤP TRUNG BÌNH LỚN (20.000) KM\", \"price\": 599000},\n" +
-                "      {\"serviceId\": \"6\", \"serviceName\": \"Vệ sinh kim phun (bao gồm dung dịch kèm theo)\", \"price\": 660000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"7\", \"supplyName\": \"Gạt mưa Bosch mềm\", \"price\": 600000, \"quantity\": 7},\n" +
-                "      {\"supplyId\": \"5\", \"supplyName\": \"Còi Denso\", \"price\": 500000, \"quantity\": 3}\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 3,\n" +
-                "    \"licensePlate\": \"30H-456.78\",\n" +
-                "    \"ownerName\": \"Lê Hương Giang\",\n" +
-                "    \"carBrandId\": 3,\n" +
-                "    \"carBrandText\": \"Suzuki\",\n" +
-                "    \"carTypeId\": 3,\n" +
-                "    \"carTypeText\": \"SUV\",\n" +
-                "    \"phoneNumber\": \"0912345678\",\n" +
-                "    \"receiveDate\": \"2024, 06, 18\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 2,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"1\", \"serviceName\": \"BẢO DƯỠNG CẤP NHỎ (5000) KM\", \"price\": 199000},\n" +
-                "      {\"serviceId\": \"11\", \"serviceName\": \"Cân bằng động (100k/bánh)\", \"price\": 400000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"1\", \"supplyName\": \"Dung dịch phụ gia súc béc xăng (Wurth)\", \"price\": 300000, \"quantity\": 2},\n" +
-                "      {\"supplyId\": \"4\", \"supplyName\": \"Nước làm mát (Asin, Jinco)\", \"price\": 150000, \"quantity\": 5}\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 4,\n" +
-                "    \"licensePlate\": \"79D-012.34\",\n" +
-                "    \"ownerName\": \"Phạm Quốc Anh\",\n" +
-                "    \"carBrandId\": 4,\n" +
-                "    \"carBrandText\": \"Vinfast\",\n" +
-                "    \"carTypeId\": 4,\n" +
-                "    \"carTypeText\": \"Luxury\",\n" +
-                "    \"phoneNumber\": \"0976543210\",\n" +
-                "    \"receiveDate\": \"2024, 08, 25\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 3,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
-                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
-                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 5,\n" +
-                "    \"licensePlate\": \"60C-876.54\",\n" +
-                "    \"ownerName\": \"Hoàng Thu Trang\",\n" +
-                "    \"carBrandId\": 2,\n" +
-                "    \"carBrandText\": \"Aston Martin\",\n" +
-                "    \"carTypeId\": 4,\n" +
-                "    \"carTypeText\": \"Luxury\",\n" +
-                "    \"phoneNumber\": \"0961112222\",\n" +
-                "    \"receiveDate\": \"2024, 10, 05\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 0,\n" +
-                "    \"carServices\": [],\n" +
-                "    \"carSupplies\": []\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 6,\n" +
-                "    \"licensePlate\": \"15B-789.01\",\n" +
-                "    \"ownerName\": \"Đỗ Văn Minh\",\n" +
-                "    \"carBrandId\": 4,\n" +
-                "    \"carBrandText\": \"Vinfast\",\n" +
-                "    \"carTypeId\": 4,\n" +
-                "    \"carTypeText\": \"Luxury\",\n" +
-                "    \"phoneNumber\": \"0345967735\",\n" +
-                "    \"receiveDate\": \"2024, 11, 30\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 1,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
-                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
-                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]";
-
-////        Converting json into List<Car>
-//        Gson gson = new GsonBuilder()
-//                .registerTypeAdapter(Date.class, new DateDeserializer())
-//                .create();
-//        List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
-
-//        db = FirebaseFirestore.getInstance();
-//        helper.runTaskInBackground("Car", new FirestoreCallback() {
-//            @Override
-//            public void onSuccess(DocumentSnapshot document) {
-//                if (document != null) {
-//                    Car car = document.toObject(Car.class);
-//                    List<CarService> carServiceList = new ArrayList<>();
-//                    List<CarSupply> carSupplyList = new ArrayList<>();
-//
-//                    // Track the number of async tasks
-//                    AtomicInteger remainingTasks = new AtomicInteger(car.getCarServices().size() + car.getCarSupplies().size());
-//
-//                    // Callback to notify when all tasks are complete
-//                    Runnable onComplete = () -> {
-//                        if (remainingTasks.get() == 0) {
-//                            car.setCarServiceList(carServiceList);
-//                            car.setCarSupplyList(carSupplyList);
-//                            Log.i("carServiceListSize", String.valueOf(carServiceList.size()));
-//                            Log.i("carSupplyListSize", String.valueOf(carSupplyList.size()));
-//                            cars.add(car);
-//                        }
-//                    };
-//
-//                    // Fetch CarService data
-//                    for (String id : car.getCarServices()) {
-//                        helper.runTaskInBackground("CarService", "serviceId", id, new FirestoreCallback() {
-//                            @Override
-//                            public void onSuccess(DocumentSnapshot document) {
-//                                if (document != null) {
-//                                    synchronized (carServiceList) {
-//                                        carServiceList.add(document.toObject(CarService.class));
-//                                    }
-//                                } else {
-//                                    Log.d("Firestore", "No CarService document found.");
-//                                }
-//                                remainingTasks.decrementAndGet();
-//                                onComplete.run();
-//                            }
-//
-//                            @Override
-//                            public void onFailure(Exception e) {
-//                                Log.e("Firestore", "Error fetching CarService document", e);
-//                                remainingTasks.decrementAndGet();
-//                                onComplete.run();
-//                            }
-//                        });
-//                    }
-//
-//                    // Fetch CarSupply data
-//                    for (String key : car.getCarSupplies().keySet()) {
-//                        int quantity = car.getCarSupplies().get(key);
-//                        helper.runTaskInBackground("CarSupply", "supplyId", key, new FirestoreCallback() {
-//                            @Override
-//                            public void onSuccess(DocumentSnapshot document) {
-//                                if (document != null) {
-//                                    CarSupply carSupply = document.toObject(CarSupply.class);
-//                                    carSupply.setQuantity(quantity);
-//                                    synchronized (carSupplyList) {
-//                                        carSupplyList.add(carSupply);
-//                                    }
-//                                } else {
-//                                    Log.d("Firestore", "No CarSupply document found.");
-//                                }
-//                                remainingTasks.decrementAndGet();
-//                                onComplete.run();
-//                            }
-//
-//                            @Override
-//                            public void onFailure(Exception e) {
-//                                Log.e("Firestore", "Error fetching CarSupply document", e);
-//                                remainingTasks.decrementAndGet();
-//                                onComplete.run();
-//                            }
-//                        });
-//                    }
-//
-//
-//                } else {
-//                    Log.d("Firestore", "No Car document found.");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Exception e) {
-//                Log.e("Firestore", "Error fetching Car document", e);
-//            }
-//        });
-
-
-        Log.i("Firestore", "Number of cars: " + cars.size());
-        newCars = new ArrayList<>();
-        repairingCars = new ArrayList<>();
-        completedCars = new ArrayList<>();
-
-        for (int i = 0; i < cars.size(); i++) {
-            Car car = cars.get(i);
-            int state = car.getState();
-            if (state == 0) {
-                newCars.add(car);
-            } else if (state == 1) {
-                repairingCars.add(car);
-            } else if (state == 2) {
-                completedCars.add(car);
-            }
-        }
-
-//        New Car RecyclerView:
-        CarAdapter newCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
-        GridLayoutManager gridLayoutManager1 = new GridLayoutManager(getContext(), 2);
-        RecyclerView recyclerViewNewCars = view.findViewById(R.id.recyclerViewNewCars);
-        recyclerViewNewCars.setLayoutManager(gridLayoutManager1);
-        recyclerViewNewCars.setFocusable(false);
-        recyclerViewNewCars.setNestedScrollingEnabled(false);
-        newCarsAdapter.setData(newCars);
-        recyclerViewNewCars.setAdapter(newCarsAdapter);
-
-//        Repairing Car RecyclerView:
-        CarAdapter repairingCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
-        GridLayoutManager gridLayoutManager2 = new GridLayoutManager(getContext(), 2);
-        RecyclerView recyclerViewRepairingCars = view.findViewById(R.id.recyclerViewRepairingCars);
-        recyclerViewRepairingCars.setLayoutManager(gridLayoutManager2);
-        recyclerViewRepairingCars.setFocusable(false);
-        recyclerViewRepairingCars.setNestedScrollingEnabled(false);
-        repairingCarsAdapter.setData(repairingCars);
-        recyclerViewRepairingCars.setAdapter(repairingCarsAdapter);
-
-//        Completed Car RecyclerView:
-        CarAdapter completedCarsAdapter = new CarAdapter(getContext(), CarAdapter.TYPE_CAR_HOME, this);
-        GridLayoutManager gridLayoutManager3 = new GridLayoutManager(getContext(), 2);
-        RecyclerView recyclerViewCompletedCars = view.findViewById(R.id.recyclerViewCompletedCars);
-        recyclerViewCompletedCars.setLayoutManager(gridLayoutManager3);
-        recyclerViewCompletedCars.setFocusable(false);
-        recyclerViewCompletedCars.setNestedScrollingEnabled(false);
-        completedCarsAdapter.setData(completedCars);
-        recyclerViewCompletedCars.setAdapter(completedCarsAdapter);
+        db = FirebaseFirestore.getInstance();
+        EventChangeListener();
 
         Button tvNewCars = view.findViewById(R.id.tvNewCars);
         tvNewCars.setOnClickListener(new View.OnClickListener() {
@@ -431,6 +252,173 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
 
 
 
+    private void EventChangeListener() {
+        db.collection("Car")
+                .orderBy("receiveDate")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            if (progressDialog.isShowing())
+                                progressDialog.dismiss();
+                            Log.e("Firestore error", error.getMessage());
+                            return;
+                        }
+                        for (DocumentChange dc : value.getDocumentChanges()) {
+                            QueryDocumentSnapshot document = dc.getDocument();
+                            DocumentChange.Type type = dc.getType();
+                            Car car = document.toObject(Car.class);
+                            car.setCarId(document.getId());
+                            int state = car.getState();
+                            if (type == DocumentChange.Type.ADDED) {
+                                if (state == 0) {
+                                    newCars.add(car);
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, newCars, newCarsAdapter);
+                                } else if (state == 1) {
+                                    repairingCars.add(car);
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, repairingCars, repairingCarsAdapter);
+                                    setCarServiceListAndCarTypeListToAdapter(car, newCars, newCarsAdapter);
+
+                                } else if (state == 2) {
+                                    completedCars.add(car);
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, completedCars, completedCarsAdapter);
+                                    setCarServiceListAndCarTypeListToAdapter(car, newCars, newCarsAdapter);
+                                }
+                            }
+                            else if (type == DocumentChange.Type.MODIFIED) {
+                                for (int i = 0; i < newCars.size(); i++) {
+                                    if (car.getCarId().equals(newCars.get(i).getCarId())) {
+                                        newCars.set(i, car);
+                                        break;
+                                    }
+                                }
+                                for (int i = 0; i < repairingCars.size(); i++) {
+                                    if (car.getCarId().equals(repairingCars.get(i).getCarId())) {
+                                        repairingCars.set(i, car);
+                                        break;
+                                    }
+                                }
+                                for (int i = 0; i < completedCars.size(); i++) {
+                                    if (car.getCarId().equals(completedCars.get(i).getCarId())) {
+                                        completedCars.set(i, car);
+                                        break;
+                                    }
+                                }
+                            }
+                            newCarsAdapter.setData(newCars);
+                            repairingCarsAdapter.setData(repairingCars);
+                            completedCarsAdapter.setData(completedCars);
+                        }
+                    }
+                });
+    }
+
+    private void setCarBrandTextAndCarTypeTextToAdapter(Car car, List<Car> carList, CarAdapter carAdapter) {
+        progressDialog.show();
+        db.collection("CarBrand")
+                .document(car.getCarBrandId())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        for (int i = 0; i < carList.size(); i++) {
+                            if (carList.get(i).getCarId().equals(car.getCarId())) {
+                                carList.get(i).setCarBrandText(documentSnapshot.getString("carBrandText"));
+                                carAdapter.notifyDataSetChanged();
+                                if (progressDialog.isShowing())
+                                    progressDialog.dismiss();
+                                break;
+                            }
+                        }
+                    }
+                });
+        progressDialog.show();
+        db.collection("CarType")
+                .document(car.getCarTypeId())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        for (int i = 0; i < carList.size(); i++) {
+                            if (carList.get(i).getCarId().equals(car.getCarId())) {
+                                carList.get(i).setCarTypeText(documentSnapshot.getString("carTypeText"));
+                                carAdapter.notifyDataSetChanged();
+                                if (progressDialog.isShowing())
+                                    progressDialog.dismiss();
+                                break;
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void setCarServiceListAndCarTypeListToAdapter(Car car, List<Car> carList, CarAdapter carAdapter) {
+        List<String> carServices = car.getCarServices();
+        List<CarService> carServiceList = car.getCarServiceList();
+        for (int i = 0; i < carServices.size(); i++) {
+            String carServiceId = carServices.get(i);
+            int finalI = i;
+            progressDialog.show();
+            db.collection("CarService")
+                    .document(carServiceId)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            CarService carService = documentSnapshot.toObject(CarService.class);
+                            carService.setServiceId(carServiceId);
+                            carServiceList.add(carService);
+                            if (finalI == carServices.size() - 1) {
+                                for (int j = 0; j < carList.size(); j++) {
+                                    if (carList.get(j).getCarId().equals(car.getCarId())) {
+                                        carList.get(j).setCarServiceList(carServiceList);
+                                        carAdapter.notifyDataSetChanged();
+                                        if (progressDialog.isShowing())
+                                            progressDialog.dismiss();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    });
+        }
+
+        Map<String, Integer> carSupplies = car.getCarSupplies();
+        List<CarSupply> carSupplyList = car.getCarSupplyList();
+        int i = -1;
+        for (String key : carSupplies.keySet()) {
+            i++;
+            String carSupplyId = key;
+            int quantity = carSupplies.get(key);
+            int finalI = i;
+            progressDialog.show();
+            db.collection("CarSupply")
+                    .document(carSupplyId)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            CarSupply carSupply = documentSnapshot.toObject(CarSupply.class);
+                            carSupply.setQuantity(quantity);
+                            carSupply.setSupplyId(carSupplyId);
+                            carSupplyList.add(carSupply);
+                            if (finalI == carSupplies.keySet().size() - 1) {
+                                for (int j = 0; j < carList.size(); j++) {
+                                    if (carList.get(j).getCarId().equals(car.getCarId())) {
+                                        carList.get(j).setCarSupplyList(carSupplyList);
+                                        carAdapter.notifyDataSetChanged();
+                                        if (progressDialog.isShowing())
+                                            progressDialog.dismiss();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    });
+        }
+    }
+
+
     @Override
     public void onItemClick(int position) {
 
@@ -439,18 +427,20 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     @Override
     public void onItemClick(int position, int state) {
         if (state == 0) {
-            Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
-            intent.putExtra("LICENSE_PLATE", newCars.get(position).getLicensePlate());
-            intent.putExtra("CAR_BRAND_ID", newCars.get(position).getCarBrandId());
-            intent.putExtra("CAR_BRAND_TEXT", newCars.get(position).getCarBrandText());
-            intent.putExtra("CAR_TYPE_ID", newCars.get(position).getCarTypeId());
-            intent.putExtra("CAR_TYPE_TEXT", newCars.get(position).getCarTypeText());
-            intent.putExtra("OWNER_NAME", newCars.get(position).getOwnerName());
-            intent.putExtra("PHONE_NUMBER", newCars.get(position).getPhoneNumber());
-            intent.putExtra("RECEIVE_DATE", formatter.format(newCars.get(position).getReceiveDate()));
-            intent.putExtra("CAR_IMAGE", newCars.get(position).getCarImage());
-            intent.putExtra("STATE", state);
-            startActivity(intent);
+            if (newCars.get(position).getCarBrandText() != null && newCars.get(position).getCarTypeText() != null) {
+                Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
+                intent.putExtra("LICENSE_PLATE", newCars.get(position).getLicensePlate());
+                intent.putExtra("CAR_BRAND_ID", newCars.get(position).getCarBrandId());
+                intent.putExtra("CAR_BRAND_TEXT", newCars.get(position).getCarBrandText());
+                intent.putExtra("CAR_TYPE_ID", newCars.get(position).getCarTypeId());
+                intent.putExtra("CAR_TYPE_TEXT", newCars.get(position).getCarTypeText());
+                intent.putExtra("OWNER_NAME", newCars.get(position).getOwnerName());
+                intent.putExtra("PHONE_NUMBER", newCars.get(position).getPhoneNumber());
+                intent.putExtra("RECEIVE_DATE", formatter.format(newCars.get(position).getReceiveDate()));
+                intent.putExtra("CAR_IMAGE", newCars.get(position).getCarImage());
+                intent.putExtra("STATE", state);
+                startActivity(intent);
+            }
         }
         else if (state == 1) {
             Intent intent = new Intent(getContext(), RepairingCarDetailActivity.class);

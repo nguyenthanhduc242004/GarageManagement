@@ -9,34 +9,34 @@
         android:layout_height="wrap_content">
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Mã"
+            android:layout_height="match_parent"
+            android:text="STT"
             android:paddingHorizontal="2dp"
             android:textColor="@color/black"
             android:textStyle="bold"
             android:layout_weight="1"
-            android:textAlignment="center"
+            android:gravity="center"
             android:background="@drawable/square_border"/>
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Tên Dịch Vụ"
             android:paddingHorizontal="2dp"
             android:textColor="@color/black"
             android:textStyle="bold"
             android:layout_weight="4"
-            android:textAlignment="center"
+            android:gravity="center"
             android:background="@drawable/square_border"/>
         <TextView
             android:id="@+id/tvCarServicePriceHeader"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="Giá"
             android:paddingHorizontal="2dp"
             android:textColor="@color/black"
             android:layout_weight="2"
             android:textStyle="bold"
-            android:textAlignment="center"
+            android:gravity="center"
             android:background="@drawable/square_border"/>
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView

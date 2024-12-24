@@ -51,10 +51,26 @@
             android:background="@drawable/border"
             />
 
-        <include layout="@layout/repairing_car_detail"
+        <include
+            android:id="@+id/repairing_car_detail"
+            layout="@layout/repairing_car_detail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/spinner"/>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAdd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/repairing_car_detail"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="@color/white"
+            android:paddingVertical="12dp"
+            android:text="Thêm Dịch Vụ"
+            android:textColor="@color/textColor"
+            android:textSize="16sp"
+            app:strokeColor="#000"
+            app:strokeWidth="2dp" />
     </RelativeLayout>
 </ScrollView>

@@ -1,9 +1,13 @@
 package com.example.garagemanagement;
 
+import static android.content.ContentValues.TAG;
+
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -12,8 +16,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -29,6 +35,17 @@ import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.adapter.CarServiceAdapter;
 import com.example.garagemanagement.adapter.CarSpinnerAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
+import com.example.garagemanagement.fragments.FragmentHome;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -37,6 +54,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AddRepairCardActivity extends AppCompatActivity implements RecyclerViewInterface, CustomCarSupplyDialog.CustomCarSupplyDialogInterface {
     Car currentCar;
@@ -49,6 +69,16 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
     TextView totalCarSupplyPrice;
     long totalCarSupplyPriceLong = 0;
     TextView tvTotalPrice;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    ProgressDialog progressDialog;
+
+    List<Car> newCars = new ArrayList<>();
+    CarSpinnerAdapter carSpinnerAdapter;
+    List<CarService> allCarServices = new ArrayList<>();
+    List<CarSupply> allCarSupplies = new ArrayList<>();
+
+    List<CarService> selectedCarServices = new ArrayList<>();
 
     public static List<CarSupply> selectedCarSupplies = new ArrayList<>();
 
@@ -75,7 +105,6 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         });
 
 
-        tvTotalPrice = findViewById(R.id.tvTotalPrice);
 
 //        BACK BUTTON:
         ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
@@ -85,6 +114,12 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
                 finish();
             }
         });
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Đang tải...");
+//        progressDialog.show();
+
 
         //        BASIC INFORMATION:
         TextView tvOwnerName = findViewById(R.id.tvOwnerName);
@@ -98,140 +133,16 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         //        CAR BRAND SPINNER:
         Spinner spinner = findViewById(R.id.spinner);
 
-        String json = "[\n" +
-                "  {\n" +
-                "    \"carId\": 1,\n" +
-                "    \"licensePlate\": \"29A-123.45\",\n" +
-                "    \"ownerName\": \"Nguyễn Thị Linh\",\n" +
-                "    \"carBrandId\": 1,\n" +
-                "    \"carBrandText\": \"Honda\",\n" +
-                "    \"carTypeId\": 1,\n" +
-                "    \"carTypeText\": \"Mini\",\n" +
-                "    \"phoneNumber\": \"0901234567\",\n" +
-                "    \"receiveDate\": \"2024, 02, 14\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 0,\n" +
-                "    \"carServices\": [],\n" +
-                "    \"carSupplies\": []\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 2,\n" +
-                "    \"licensePlate\": \"51F-987.65\",\n" +
-                "    \"ownerName\": \"Trần Minh Phúc\",\n" +
-                "    \"carBrandId\": 2,\n" +
-                "    \"carBrandText\": \"Aston Martin\",\n" +
-                "    \"carTypeId\": 2,\n" +
-                "    \"carTypeText\": \"Sedan\",\n" +
-                "    \"phoneNumber\": \"0987654321\",\n" +
-                "    \"receiveDate\": \"2024, 04, 10\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 1,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"3\", \"serviceName\": \"BẢO DƯỠNG CẤP TRUNG BÌNH LỚN (20.000) KM\", \"price\": 599000},\n" +
-                "      {\"serviceId\": \"6\", \"serviceName\": \"Vệ sinh kim phun (bao gồm dung dịch kèm theo)\", \"price\": 660000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"7\", \"supplyName\": \"Gạt mưa Bosch mềm\", \"price\": 600000, \"quantity\": 7},\n" +
-                "      {\"supplyId\": \"5\", \"supplyName\": \"Còi Denso\", \"price\": 500000, \"quantity\": 3}\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 3,\n" +
-                "    \"licensePlate\": \"30H-456.78\",\n" +
-                "    \"ownerName\": \"Lê Hương Giang\",\n" +
-                "    \"carBrandId\": 3,\n" +
-                "    \"carBrandText\": \"Suzuki\",\n" +
-                "    \"carTypeId\": 3,\n" +
-                "    \"carTypeText\": \"SUV\",\n" +
-                "    \"phoneNumber\": \"0912345678\",\n" +
-                "    \"receiveDate\": \"2024, 06, 18\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 2,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"1\", \"serviceName\": \"BẢO DƯỠNG CẤP NHỎ (5000) KM\", \"price\": 199000},\n" +
-                "      {\"serviceId\": \"11\", \"serviceName\": \"Cân bằng động (100k/bánh)\", \"price\": 400000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"1\", \"supplyName\": \"Dung dịch phụ gia súc béc xăng (Wurth)\", \"price\": 300000, \"quantity\": 2},\n" +
-                "      {\"supplyId\": \"4\", \"supplyName\": \"Nước làm mát (Asin, Jinco)\", \"price\": 150000, \"quantity\": 5}\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 4,\n" +
-                "    \"licensePlate\": \"79D-012.34\",\n" +
-                "    \"ownerName\": \"Phạm Quốc Anh\",\n" +
-                "    \"carBrandId\": 4,\n" +
-                "    \"carBrandText\": \"Vinfast\",\n" +
-                "    \"carTypeId\": 4,\n" +
-                "    \"carTypeText\": \"Luxury\",\n" +
-                "    \"phoneNumber\": \"0976543210\",\n" +
-                "    \"receiveDate\": \"2024, 08, 25\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 3,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
-                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
-                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 5,\n" +
-                "    \"licensePlate\": \"60C-876.54\",\n" +
-                "    \"ownerName\": \"Hoàng Thu Trang\",\n" +
-                "    \"carBrandId\": 2,\n" +
-                "    \"carBrandText\": \"Aston Martin\",\n" +
-                "    \"carTypeId\": 4,\n" +
-                "    \"carTypeText\": \"Luxury\",\n" +
-                "    \"phoneNumber\": \"0961112222\",\n" +
-                "    \"receiveDate\": \"2024, 10, 05\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 0,\n" +
-                "    \"carServices\": [],\n" +
-                "    \"carSupplies\": []\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"carId\": 6,\n" +
-                "    \"licensePlate\": \"15B-789.01\",\n" +
-                "    \"ownerName\": \"Đỗ Văn Minh\",\n" +
-                "    \"carBrandId\": 4,\n" +
-                "    \"carBrandText\": \"Vinfast\",\n" +
-                "    \"carTypeId\": 4,\n" +
-                "    \"carTypeText\": \"Luxury\",\n" +
-                "    \"phoneNumber\": \"0345967735\",\n" +
-                "    \"receiveDate\": \"2024, 11, 30\",\n" +
-                "    \"carImage\": 0,\n" +
-                "    \"state\": 1,\n" +
-                "    \"carServices\": [\n" +
-                "      {\"serviceId\": \"9\", \"serviceName\": \"Kiểm tra hệ thống điện chuyên sâu\", \"price\": 1200000},\n" +
-                "      {\"serviceId\": \"12\", \"serviceName\": \"Cân chỉnh độ chụm\", \"price\": 800000}\n" +
-                "    ],\n" +
-                "    \"carSupplies\": [\n" +
-                "      {\"supplyId\": \"2\", \"supplyName\": \"Dung dịch hụ gia súc nhớt (Wurth)\", \"price\": 300000, \"quantity\": 3},\n" +
-                "      {\"supplyId\": \"6\", \"supplyName\": \"Gạt mưa Bosch cứng\", \"price\": 350000, \"quantity\": 2}\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]";
-
-//        Converting json into List<Car>
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Date.class, new DateDeserializer())
-                .create();
-        List<Car> cars = gson.fromJson(json, new TypeToken<List<Car>>() {}.getType());
-        List<Car> newCars = new ArrayList<>();
-
-        for (int i = 0; i < cars.size(); i++) {
-            Car car = cars.get(i);
-            if (car.getState() == 0) {
-                newCars.add(car);
-            }
-        }
-
-//        CAR SPINNER:
-        CarSpinnerAdapter carSpinnerAdapter = new CarSpinnerAdapter(this, R.layout.item_car_brand_selected, newCars);
+        // GET CARS DATA
+        newCars = FragmentHome.newCars;
+        currentCar = newCars.get(0);
+        carSpinnerAdapter = new CarSpinnerAdapter(getApplicationContext(), R.layout.item_car_brand_selected, newCars);
         spinner.setAdapter(carSpinnerAdapter);
+
+        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
+        totalCarSupplyPrice = findViewById(R.id.totalCarSupplyPrice);
+        tvTotalPrice = findViewById(R.id.tvTotalPrice);
+
         TextView tvCarServicePriceHeader = findViewById(R.id.tvCarServicePriceHeader);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -251,19 +162,17 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
                     }
 
                     tvCarServicePriceHeader.setText(String.format("Giá (%s)", currentCar.getCarTypeText()));
-//                TODO: CALL API CAR SERVICES BASES ON CAR TYPE
-//                TODO: THEN SET DATA TO CAR SERVICE ADAPTER
-//                TODO: THEN SET DATA TO allCarServices
                     carServiceAdapter.setData(currentCar.getCarServiceList());
-                    carSupplyAdapter.setData(currentCar.getCarSupplyList());
                     totalCarSupplyPriceLong = 0;
                     for (int j = 0; j < currentCar.getCarSupplyList().size(); j++) {
-                        totalCarSupplyPriceLong += currentCar.getCarSupplyList().get(j).getPrice();
+                        totalCarSupplyPriceLong += currentCar.getCarSupplyList().get(j).getPrice() * currentCar.getCarSupplyList().get(j).getQuantity();
                     }
+
                     totalCarSupplyPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarSupplyPriceLong)));
+                    carSupplyAdapter.setData(currentCar.getCarSupplyList());
                     totalCarServicePriceLong = 0;
                     for (int j = 0; j < currentCar.getCarServiceList().size(); j++) {
-//                        TODO: totalCarServicePriceLong += currentCar.getCarServiceList().get(j).getPrices().get();
+                        totalCarServicePriceLong += currentCar.getCarServiceList().get(j).getPrices().get(currentCar.getCarTypeId());
                     }
                     totalCarServicePrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong)));
                     tvTotalPrice.setText(String.format("Tổng: %sđ", currencyFormatter.format(totalCarServicePriceLong + totalCarSupplyPriceLong)));
@@ -292,7 +201,7 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
                 }
             }
         });
-
+//
 //        TOGGLE CAR SERVICE LIST BUTTON:
         LinearLayout carServiceWrapper = findViewById(R.id.car_service_wrapper);
         Button toggleCarServicesButton = findViewById(R.id.toggleCarServicesButton);
@@ -310,92 +219,161 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
             }
         });
 
-//        CarServiceAdapter
-//        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), CarServiceAdapter.TYPE_LIST,  this);
-//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-//        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
-//        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
-//        recyclerViewCarServiceList.setFocusable(false);
-//        carServiceAdapter.setData(new ArrayList<>());
-//        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
+////        CarServiceAdapter
+        carServiceAdapter = new CarServiceAdapter(getApplicationContext(), CarServiceAdapter.TYPE_LIST,  currentCar.getCarTypeId(), this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        RecyclerView recyclerViewCarServiceList = findViewById(R.id.recyclerViewCarServiceList);
+        recyclerViewCarServiceList.setLayoutManager(linearLayoutManager);
+        recyclerViewCarServiceList.setFocusable(false);
+        carServiceAdapter.setData(new ArrayList<>());
+        recyclerViewCarServiceList.setAdapter(carServiceAdapter);
 
 //        ADD CAR SERVICE BUTTON:
-        // TODO: CALL API PROPERLY
-        // FAKE CALL API SERVICE LIST:
-//        CarService carService1 = new CarService("1", "Bảo dưỡng cấp nhỏ (5000) KM", 149000);
-//        CarService carService2 = new CarService("2", "Bảo dưỡng cấp trung bình (10.000) KM", 299000);
-//        CarService carService3 = new CarService("3", "Bảo dưỡng cấp trung bình lớn (20.000) KM", 399000);
-//        CarService carService4 = new CarService("4", "Bảo dưỡng cấp lớn (40.000) KM", 799000);
-//        CarService carService5 = new CarService("5", "Bảo dưỡng phanh 4 bánh", 500000);
-//        CarService carService6 = new CarService("6", "Vệ sinh kim phun (bao gồm dung dịch kèm theo)", 660000);
-//        CarService carService7 = new CarService("7", "Kiểm tra hệ thống giảm", 350000);
-//        CarService carService8 = new CarService("8", "Kiểm tra hệ thống điện chuyên sâu", 1200000);
-//        CarService carService9 = new CarService("9", "Kiểm tra tổng quát", 600000);
-//        CarService carService10 = new CarService("10", "Cân bằng động (100k/ bánh)", 400000);
-//        CarService carService11 = new CarService("11", "Cân chỉnh độ chụm", 500000);
-//        List<CarService> carServices = List.of(carService1, carService2, carService3, carService4, carService5, carService6, carService7, carService8, carService9, carService10, carService11);
+        Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
+        addCarServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (allCarServices.isEmpty()) {
+                    progressDialog.show();
+                    db.collection("CarService")
+                            .get()
+                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                        CarService carService = documentSnapshot.toObject(CarService.class);
+                                        carService.setServiceId(documentSnapshot.getId());
+                                        allCarServices.add(carService);
+                                    }
+                                    if (progressDialog.isShowing()) {
+                                        progressDialog.dismiss();
+                                    }
 
-//        String[] carServiceNames = new String[carServices.size()];
-//        for (int i = 0; i < carServices.size(); i++) {
-//            carServiceNames[i] = carServices.get(i).getServiceName();
-//        }
-//
-//        totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
-//        boolean[] checkedServices = new boolean[carServices.size()];
-//        Button addCarServiceButton = findViewById(R.id.addCarServiceButton);
-//        List<CarService> finalCarServices = carServices;
-//        addCarServiceButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                AlertDialog.Builder builder = new AlertDialog.Builder(AddRepairCardActivity.this);
-//                builder.setTitle("Chọn Dịch Vụ");
-//                builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
-//                        // Update current focused item's checked status
-//                        checkedServices[which] = isChecked;
-//                        // Get the current focused item
-//                        // CarService currentItem = finalCarServices.get(which);
-//                        // Notify the current action
-//                        // Toast.makeText(AddRepairCardActivity.this, currentItem.getServiceName() + " " + isChecked, Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//
-//                // Set positive/yes button click listener
-//                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int which) {
-//                        List<CarService> selectedCarServices = new ArrayList<>();
-//                        long totalPrice = 0;
-//                        for (int i = 0; i < checkedServices.length; i++) {
-//                            boolean checked = checkedServices[i];
-//                            if (checked) {
-//                                selectedCarServices.add(finalCarServices.get(i));
-//                                totalPrice += finalCarServices.get(i).getPrice();
-//                            }
-//                        }
-//                        carServiceAdapter.setData(selectedCarServices);
-//                        totalCarServicePrice.setText("Tổng: " + currencyFormatter.format(totalPrice) + "đ");
-//                        totalCarServicePriceLong = totalPrice;
-//                        tvTotalPrice.setText("Tổng tiền: " + currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong) + "đ");
-//                    }
-//                });
-//
-//
-//                // Set neutral/cancel button click listener
-//                builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialogInterface, int i) {
-//                        // Do something here
-//                    }
-//                });
-//
-//                AlertDialog alertDialog = builder.create();
-//                // Show alert dialog
-//                alertDialog.show();
-//            }
-//        });
+                                    String[] carServiceNames = new String[allCarServices.size()];
+                                    boolean[] checkedServices = new boolean[allCarServices.size()];
+                                    for (int i = 0; i < allCarServices.size(); i++) {
+                                        carServiceNames[i] = allCarServices.get(i).getServiceName();
+                                        for (int j = 0; j < selectedCarServices.size(); j++) {
+                                            if (selectedCarServices.get(j).getServiceId().equals(allCarServices.get(i).getServiceId())) {
+                                                checkedServices[i] = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(AddRepairCardActivity.this);
+                                    builder.setTitle("Chọn Dịch Vụ");
+                                    builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
+                                            // Update current focused item's checked status
+                                            checkedServices[which] = isChecked;
+                                            // Get the current focused item
+                                            // CarService currentItem = finalCarServices.get(which);
+                                            // Notify the current action
+                                            // Toast.makeText(AddRepairCardActivity.this, currentItem.getServiceName() + " " + isChecked, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+
+                                    // Set positive/yes button click listener
+                                    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int which) {
+                                            selectedCarServices = new ArrayList<>();
+                                            long totalPrice = 0;
+                                            for (int i = 0; i < checkedServices.length; i++) {
+                                                boolean checked = checkedServices[i];
+                                                if (checked) {
+                                                    selectedCarServices.add(allCarServices.get(i));
+                                                    totalPrice += allCarServices.get(i).getPrices().get(currentCar.getCarTypeId());
+                                                }
+                                            }
+                                            currentCar.setCarServiceList(selectedCarServices);
+                                            carServiceAdapter.setData(selectedCarServices);
+                                            totalCarServicePrice.setText("Tổng: " + currencyFormatter.format(totalPrice) + "đ");
+                                            totalCarServicePriceLong = totalPrice;
+                                            tvTotalPrice.setText("Tổng tiền: " + currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong) + "đ");
+                                        }
+                                    });
+
+
+                                    // Set neutral/cancel button click listener
+                                    builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            // Do something here
+                                        }
+                                    });
+
+                                    AlertDialog alertDialog = builder.create();
+                                    alertDialog.show();
+                                }
+                            });
+                }
+                else {
+                    String[] carServiceNames = new String[allCarServices.size()];
+                    boolean[] checkedServices = new boolean[allCarServices.size()];
+                    for (int i = 0; i < allCarServices.size(); i++) {
+                        carServiceNames[i] = allCarServices.get(i).getServiceName();
+                        for (int j = 0; j < selectedCarServices.size(); j++) {
+                            if (selectedCarServices.get(j).getServiceId().equals(allCarServices.get(i).getServiceId())) {
+                                checkedServices[i] = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AddRepairCardActivity.this);
+                    builder.setTitle("Chọn Dịch Vụ");
+                    builder.setMultiChoiceItems(carServiceNames, checkedServices, new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int which, boolean isChecked) {
+                            // Update current focused item's checked status
+                            checkedServices[which] = isChecked;
+                            // Get the current focused item
+                            // CarService currentItem = finalCarServices.get(which);
+                            // Notify the current action
+                            // Toast.makeText(AddRepairCardActivity.this, currentItem.getServiceName() + " " + isChecked, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    // Set positive/yes button click listener
+                    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int which) {
+                            selectedCarServices = new ArrayList<>();
+                            long totalPrice = 0;
+                            for (int i = 0; i < checkedServices.length; i++) {
+                                boolean checked = checkedServices[i];
+                                if (checked) {
+                                    selectedCarServices.add(allCarServices.get(i));
+                                    totalPrice += allCarServices.get(i).getPrices().get(currentCar.getCarTypeId());
+                                }
+                            }
+                            currentCar.setCarServiceList(selectedCarServices);
+                            carServiceAdapter.setData(selectedCarServices);
+                            totalCarServicePrice.setText("Tổng: " + currencyFormatter.format(totalPrice) + "đ");
+                            totalCarServicePriceLong = totalPrice;
+                            tvTotalPrice.setText("Tổng tiền: " + currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong) + "đ");
+                        }
+                    });
+
+
+                    // Set neutral/cancel button click listener
+                    builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Do something here
+                        }
+                    });
+
+                    AlertDialog alertDialog = builder.create();
+                    // Show alert dialog
+                    alertDialog.show();
+                }
+
+            }
+        });
 
 //        TOGGLE CAR SUPPLY LIST BUTTON:
         LinearLayout carSupplyWrapper = findViewById(R.id.car_supply_wrapper);
@@ -415,7 +393,6 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         });
 
 //        ADD CAR SUPPLY BUTTON:
-
 //        CarSupplyAdapter
         carSupplyAdapter = new CarSupplyAdapter(getApplicationContext(), CarSupplyAdapter.TYPE_LIST, this);
         RecyclerView recyclerViewCarSupplyList = findViewById(R.id.recyclerViewCarSupplyList);
@@ -434,9 +411,30 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
                 openCarSupplyDialog(view);
             }
         });
+
+        MaterialButton buttonAdd = findViewById(R.id.buttonAdd);
+        buttonAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                db.collection("Car")
+//                        .document(currentCar.getCarId())
+//                        .update()
+                if (currentCar.getCarServiceList().isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Vui lòng chọn ít nhất một dịch vụ!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.i("carId", currentCar.getCarId());
+                    Log.i("ownerName", currentCar.getOwnerName());
+                    for (int i = 0; i < currentCar.getCarServiceList().size(); i++) {
+                        Log.i("carService[" + i + "]", currentCar.getCarServiceList().get(i).getServiceName());
+                    }
+                    for (int i = 0; i < currentCar.getCarSupplyList().size(); i++) {
+                        Log.i("carSupply[" + i + "]", currentCar.getCarSupplyList().get(i).getSupplyName() + " SL: " + currentCar.getCarSupplyList().get(i).getQuantity());
+                    }
+                }
+
+            }
+        });
     }
-
-
 
     @Override
     public void onItemClick(int position) {

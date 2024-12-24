@@ -2,8 +2,11 @@ package com.example.garagemanagement;
 
 import static android.content.ContentValues.TAG;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,30 +21,42 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.garagemanagement.Objects.Car;
+import com.example.garagemanagement.Objects.CarBrand;
+import com.example.garagemanagement.Objects.CarService;
+import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.adapter.AdapterViewPager;
+import com.example.garagemanagement.adapter.CarSpinnerAdapter;
 import com.example.garagemanagement.fragments.FragmentAccount;
 import com.example.garagemanagement.fragments.FragmentCars;
 import com.example.garagemanagement.fragments.FragmentHome;
 import com.example.garagemanagement.fragments.FragmentPayment;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
+    public static ProgressDialog mainProgressDialog;
+    FragmentActivity _this = this;
 
     ViewPager2 pagerMain;
-    ArrayList<Fragment> fragmentArrayList = new ArrayList<>();
     public static BottomNavigationView bottomNav;
 
     private static final int TIME_INTERVAL = 2000; // # milliseconds, desired time passed between two back presses.
@@ -61,6 +76,139 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+
+        mainProgressDialog = new ProgressDialog(this);
+        mainProgressDialog.setCancelable(false);
+        mainProgressDialog.setMessage("Đang tải...");
+//        mainProgressDialog.show();
+
+        try {
+            fetchDataFromMultipleCollections();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+//        db.collection("Car")
+//                .get()
+//                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                        if (task.isSuccessful()) {
+//                            for (DocumentSnapshot document : task.getResult()) {
+//                                // Assuming you want to display a specific field from the document
+//                                Car car = document.toObject(Car.class);
+//                                car.setCarId(document.getId());
+//                                int state = car.getState();
+//                                mainProgressDialog.show();
+//                                db.collection("CarBrand")
+//                                        .document(car.getCarBrandId())
+//                                        .get()
+//                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                                            @Override
+//                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                                                for (int i = 0; i < cars.size(); i++) {
+//                                                    if (cars.get(i).getCarId().equals(car.getCarId())) {
+//                                                        car.setCarBrandText(documentSnapshot.getString("carBrandText"));
+//                                                        cars.set(i, car);
+//                                                        if (mainProgressDialog.isShowing()) {
+//                                                            mainProgressDialog.dismiss();
+//                                                        }
+//                                                        break;
+//                                                    }
+//                                                }
+//                                            }
+//                                        });
+//                                mainProgressDialog.show();
+//                                db.collection("CarType")
+//                                        .document(car.getCarTypeId())
+//                                        .get()
+//                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                                            @Override
+//                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                                                for (int i = 0; i < cars.size(); i++) {
+//                                                    if (cars.get(i).getCarId().equals(car.getCarId())) {
+//                                                        car.setCarTypeText(documentSnapshot.getString("carTypeText"));
+//                                                        cars.set(i, car);
+//                                                        if (mainProgressDialog.isShowing()) {
+//                                                            mainProgressDialog.dismiss();
+//                                                        }
+//                                                        break;
+//                                                    }
+//                                                }
+//                                            }
+//                                        });
+//                                if (state != 0) {
+//                                    List<String> carServices = car.getCarServices();
+//                                    List<CarService> carServiceList = new ArrayList<>();
+//                                    for (int i = 0; i < carServices.size(); i++) {
+//                                        String carServiceId = carServices.get(i);
+//                                        int finalI = i;
+//                                        mainProgressDialog.show();
+//                                        db.collection("CarService")
+//                                                .document(carServiceId)
+//                                                .get()
+//                                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                                                    @Override
+//                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                                                        CarService carService = documentSnapshot.toObject(CarService.class);
+//                                                        carService.setServiceId(carServiceId);
+//                                                        carServiceList.add(carService);
+//
+//                                                        if (finalI == carServices.size() - 1) {
+//                                                            for (int j = 0; j < cars.size(); j++) {
+//                                                                if (cars.get(j).getCarId().equals(car.getCarId())) {
+//                                                                    cars.get(j).setCarServiceList(carServiceList);
+//                                                                    if (mainProgressDialog.isShowing()) {
+//                                                                        mainProgressDialog.dismiss();
+//                                                                    }
+//                                                                    break;
+//                                                                }
+//                                                            }
+//                                                        }
+//                                                    }
+//                                                });
+//                                    }
+//                                    Map<String, Integer> carSupplies = car.getCarSupplies();
+//                                    List<CarSupply> carSupplyList = new ArrayList<>();
+//                                    int i = -1;
+//                                    for (String key : carSupplies.keySet()) {
+//                                        i++;
+//                                        String carSupplyId = key;
+//                                        int quantity = carSupplies.get(key);
+//                                        int finalI = i;
+//                                        mainProgressDialog.show();
+//                                        db.collection("CarSupply")
+//                                                .document(carSupplyId)
+//                                                .get()
+//                                                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                                                    @Override
+//                                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                                                        CarSupply carSupply = documentSnapshot.toObject(CarSupply.class);
+//                                                        carSupply.setQuantity(quantity);
+//                                                        carSupply.setSupplyId(carSupplyId);
+//                                                        carSupplyList.add(carSupply);
+//                                                        if (finalI == carSupplies.keySet().size() - 1) {
+//                                                            for (int j = 0; j < cars.size(); j++) {
+//                                                                if (cars.get(j).getCarId().equals(car.getCarId())) {
+//                                                                    cars.get(j).setCarSupplyList(carSupplyList);
+//                                                                    if (mainProgressDialog.isShowing())
+//                                                                        mainProgressDialog.dismiss();
+//                                                                    break;
+//                                                                }
+//                                                            }
+//                                                        }
+//                                                    }
+//                                                });
+//                                    }
+//                                }
+//                                cars.add(car);
+//                            }
+//                        }
+//                    }
+//                });
+
+
+
         // Deleting the weird margin bottom of the BottomNavigationView
         bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setOnApplyWindowInsetsListener((v, insets) ->
@@ -70,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
 //        BottomNav and Pager: BEGIN
         pagerMain = findViewById(R.id.pagerMain);
 
+        ArrayList<Fragment> fragmentArrayList = new ArrayList<>();
         fragmentArrayList.add(new FragmentHome());
         fragmentArrayList.add(new FragmentCars());
         fragmentArrayList.add(new FragmentPayment());
@@ -128,39 +277,111 @@ public class MainActivity extends AppCompatActivity {
                 // Go to notification activity
             }
         });
-
-        db.collection("Car")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                cars.add(document.toObject(Car.class));
-                            }
-                        } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
-                        }
-                    }
-                });
     }
 
     @Override
     public void onBackPressed() {
-        if (mBackPressed + TIME_INTERVAL > System.currentTimeMillis())
-        {
+        if (mBackPressed + TIME_INTERVAL > System.currentTimeMillis()) {
             super.onBackPressed();
             return;
+        } else {
+            Toast.makeText(getBaseContext(), "Nhấn lần nữa để thoát", Toast.LENGTH_SHORT).show();
         }
-        else { Toast.makeText(getBaseContext(), "Nhấn lần nữa để thoát", Toast.LENGTH_SHORT).show(); }
 
         mBackPressed = System.currentTimeMillis();
     }
 
-    public void getCars() {
-        cars = new ArrayList<>();
-
+    public static List<Car> getCars() {
+        return cars;
     }
 
+    public static void setCars(List<Car> cars) {
+        MainActivity.cars = cars;
+    }
 
+    public static Future<Void> fetchDataFromMultipleCollections() throws Exception {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Fetch data from both collections asynchronously
+        Task<QuerySnapshot> collectionCarTask = db.collection("Car").get();
+        Task<QuerySnapshot> collectionCarBrandTask = db.collection("CarBrand").get();
+        Task<QuerySnapshot> collectionCarTypeTask = db.collection("CarType").get();
+        Task<QuerySnapshot> collectionCarServiceTask = db.collection("CarService").get();
+        Task<QuerySnapshot> collectionCarSupplyTask = db.collection("CarSupply").get();
+
+        Tasks.whenAllSuccess(collectionCarTask, collectionCarBrandTask, collectionCarTypeTask, collectionCarServiceTask, collectionCarSupplyTask)
+                .addOnSuccessListener(new OnSuccessListener<List<Object>>() {
+                    @Override
+                    public void onSuccess(List<Object> objects) {
+                        try {
+                            // Get the results
+                            QuerySnapshot collectionCarSnapshot = Tasks.await(collectionCarTask);
+                            QuerySnapshot collectionCarBrandSnapshot = Tasks.await(collectionCarBrandTask);
+                            QuerySnapshot collectionCarTypeSnapshot = Tasks.await(collectionCarTypeTask);
+                            QuerySnapshot collectionCarServiceSnapshot = Tasks.await(collectionCarServiceTask);
+                            QuerySnapshot collectionCarSupplySnapshot = Tasks.await(collectionCarSupplyTask);
+
+                            // Process data and populate spinnerItems
+                            for (DocumentSnapshot documentCar : collectionCarSnapshot.getDocuments()) {
+                                Car car = documentCar.toObject(Car.class);
+                                car.setCarId(documentCar.getId());
+                                int state = car.getState();
+
+                                String carBrandId = car.getCarBrandId();
+                                for (DocumentSnapshot documentCarBrand : collectionCarBrandSnapshot.getDocuments()) {
+                                    if (carBrandId.equals(documentCarBrand.getId())) {
+                                        car.setCarBrandText(documentCarBrand.getString("carBrandText"));
+                                        break;
+                                    }
+                                }
+
+                                String carTypeId = car.getCarTypeId();
+                                for (DocumentSnapshot documentCarType : collectionCarTypeSnapshot.getDocuments()) {
+                                    if (carTypeId.equals(documentCarType.getId())) {
+                                        car.setCarTypeText(documentCarType.getString("carTypeText"));
+                                        break;
+                                    }
+                                }
+
+                                List<String> carServices = car.getCarServices();
+                                List<CarService> carServiceList = new ArrayList<>();
+                                for (DocumentSnapshot documentCarService : collectionCarServiceSnapshot.getDocuments()) {
+                                    for (int i = 0; i < carServices.size(); i++) {
+                                        String carServiceId = carServices.get(i);
+                                        if (carServiceId.equals(documentCarService.getId())) {
+                                            CarService carService = documentCarService.toObject(CarService.class);
+                                            carService.setServiceId(carServiceId);
+                                            carServiceList.add(carService);
+                                        }
+                                    }
+                                }
+                                car.setCarServiceList(carServiceList);
+
+                                Map<String, Integer> carSupplies = car.getCarSupplies();
+                                List<CarSupply> carSupplyList = new ArrayList<>();
+                                for (DocumentSnapshot documentCarSupply : collectionCarSupplySnapshot.getDocuments()) {
+                                    String carSupplyId = documentCarSupply.getId();
+                                    int quantity = carSupplies.get(carSupplyId);
+                                    CarSupply carSupply = documentCarSupply.toObject(CarSupply.class);
+                                    carSupply.setQuantity(quantity);
+                                    carSupply.setSupplyId(carSupplyId);
+                                    carSupplyList.add(carSupply);
+                                }
+                                car.setCarSupplyList(carSupplyList);
+
+                                cars.add(car);
+                            }
+                            if (mainProgressDialog.isShowing()) {
+                                mainProgressDialog.dismiss();
+                            }
+                        } catch (Exception e) {
+                            // Handle exceptions (InterruptedException, ExecutionException)
+                            if (mainProgressDialog.isShowing()) {
+                                mainProgressDialog.dismiss();
+                            }
+                            e.printStackTrace();
+                        }
+                    }
+                });
+        return null;
+    }
 }
