@@ -90,12 +90,6 @@ public class CarBrandAdapter extends RecyclerView.Adapter<CarBrandAdapter.CarBra
                                             }
                                         });
                             }
-                        }, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Perform actions when the user confirms
-                                // (e.g., delete data, proceed with an action)
-                            }
                         });
             }
         });

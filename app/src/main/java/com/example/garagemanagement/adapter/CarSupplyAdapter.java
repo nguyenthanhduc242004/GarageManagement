@@ -85,7 +85,7 @@ public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarS
         }
         int type = holder.getItemViewType();
         if (type == TYPE_LIST) {
-            holder.tvSupplyId.setText(carSupply.getSupplyId());
+            holder.tvSupplyId.setText(String.valueOf(position + 1));
             holder.tvSupplyName.setText(carSupply.getSupplyName());
             holder.tvPrice.setText(String.format("%sđ", formatter.format(carSupply.getPrice())));
             holder.tvSupplyQuantity.setText(String.valueOf(carSupply.getQuantity()));
@@ -159,12 +159,6 @@ public class CarSupplyAdapter extends RecyclerView.Adapter<CarSupplyAdapter.CarS
                                                     Toast.makeText(context, "Xóa hãng xe không thành công!", Toast.LENGTH_SHORT).show();
                                                 }
                                             });
-                                }
-                            }, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // Perform actions when the user confirms
-                                    // (e.g., delete data, proceed with an action)
                                 }
                             });
                 }

@@ -15,6 +15,9 @@
         android:theme="@style/Theme.GarageManagement"
         tools:targetApi="31">
         <activity
+            android:name=".CompletedCarDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".AdminActivities.AdminCarServiceDetailActivity"
             android:exported="false" />
         <activity

@@ -4,13 +4,14 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Car {
+public class Car implements Serializable {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     public static final int STATE_NEW = 0;
     public static final int STATE_REPAIRING = 1;

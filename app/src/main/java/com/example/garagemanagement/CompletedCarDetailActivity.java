@@ -5,18 +5,14 @@ import android.content.Intent;
 import android.icu.text.DecimalFormat;
 import android.icu.text.NumberFormat;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -31,22 +27,20 @@ import com.example.garagemanagement.Objects.CarSupply;
 import com.example.garagemanagement.adapter.CarServiceAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
 import com.example.garagemanagement.adapter.ConfirmationDialog;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class RepairingCarDetailActivity extends AppCompatActivity implements RecyclerViewInterface {
-    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+public class CompletedCarDetailActivity extends AppCompatActivity implements RecyclerViewInterface {
+    SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy");
     NumberFormat currencyFormatter = new DecimalFormat("#,###");
+
     CarServiceAdapter carServiceAdapter;
     TextView totalCarServicePrice;
     long totalCarServicePriceLong = 0;
@@ -55,29 +49,11 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
     long totalCarSupplyPriceLong = 0;
     TextView tvTotalPrice;
 
-
-    public static List<CarService> selectedCarServices = new ArrayList<>();
-    public static List<CarSupply> selectedCarSupplies = new ArrayList<>();
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Dispatch onResume() to fragments.  Note that for better inter-operation
-     * with older versions of the platform, at the point of this call the
-     * fragments attached to the activity are <em>not</em> resumed.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        carServiceAdapter.setData(selectedCarServices);
-        carSupplyAdapter.setData(selectedCarSupplies);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_repairing_car_detail);
+        setContentView(R.layout.activity_completed_car_detail);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -91,7 +67,7 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         addCarServiceButton.setVisibility(View.GONE);
         addCarSupplyButton.setVisibility(View.GONE);
 
-//        BACK BUTTON:
+        //        BACK BUTTON:
         ImageButton imageButtonBack = findViewById(R.id.imageButtonBack);
         imageButtonBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,9 +87,10 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         String phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
         Date receiveDate = (Date) getIntent().getSerializableExtra("RECEIVE_DATE");
         int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
-        int state = getIntent().getIntExtra("STATE", -1);
-        selectedCarServices = (List<CarService>) getIntent().getSerializableExtra("CAR_SERVICES");
-        selectedCarSupplies = (List<CarSupply>) getIntent().getSerializableExtra("CAR_SUPPLIES");
+        int state = getIntent().getIntExtra("STATE", 0);
+        List<CarService> selectedCarServices = (List<CarService>) getIntent().getSerializableExtra("CAR_SERVICES");
+        List<CarSupply> selectedCarSupplies = (List<CarSupply>) getIntent().getSerializableExtra("CAR_SUPPLIES");
+        Date paymentDate = (Date) getIntent().getSerializableExtra("PAYMENT_DATE");
 
         TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
         TextView tvCarBrand = findViewById(R.id.tvCarBrand);
@@ -121,6 +98,7 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         TextView tvOwnerName = findViewById(R.id.tvOwnerName);
         TextView tvPhoneNumber = findViewById(R.id.tvPhoneNumber);
         TextView tvReceiveDate = findViewById(R.id.tvReceiveDate);
+        TextView tvPaymentDate = findViewById(R.id.tvPaymentDate);
         ImageView ivCarImage = findViewById(R.id.ivCarImage);
 
         tvLicensePlate.setText(licensePlate);
@@ -129,6 +107,7 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         tvOwnerName.setText(ownerName);
         tvPhoneNumber.setText(phoneNumber);
         tvReceiveDate.setText(dateFormatter.format(receiveDate));
+        tvPaymentDate.setText(String.format("Ngày thanh toán: %s", dateFormatter.format(paymentDate)));
         if (carImage == 0) {
             ivCarImage.setImageResource(R.drawable.no_image);
         } else {
@@ -137,29 +116,6 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
 
         TextView tvCarServicePriceHeader = findViewById(R.id.tvCarServicePriceHeader);
         tvCarServicePriceHeader.setText(String.format("Giá (%s)", carTypeText));
-
-//        EDIT BUTTON:
-        Button buttonEdit = findViewById(R.id.buttonUpdateCar);
-        buttonEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RepairingCarDetailActivity.this, UpdateRepairingCarActivity.class);
-                intent.putExtra("CAR_ID", carId);
-                intent.putExtra("LICENSE_PLATE", licensePlate);
-                intent.putExtra("CAR_BRAND_ID", carBrandId);
-                intent.putExtra("CAR_BRAND_TEXT", carBrandText);
-                intent.putExtra("CAR_TYPE_ID", carTypeId);
-                intent.putExtra("CAR_TYPE_TEXT", carTypeText);
-                intent.putExtra("OWNER_NAME", ownerName);
-                intent.putExtra("PHONE_NUMBER", phoneNumber);
-                intent.putExtra("RECEIVE_DATE", receiveDate);
-                intent.putExtra("CAR_IMAGE", carImage);
-                intent.putExtra("STATE", state);
-                intent.putExtra("CAR_SERVICES", (Serializable) selectedCarServices);
-                intent.putExtra("CAR_SUPPLIES", (Serializable) selectedCarSupplies);
-                startActivity(intent);
-            }
-        });
 
 //        TOGGLE CAR INFORMATION BUTTON:
         LinearLayout carDetailWrapper = findViewById(R.id.car_detail_wrapper);
@@ -247,29 +203,6 @@ public class RepairingCarDetailActivity extends AppCompatActivity implements Rec
         tvTotalPrice = findViewById(R.id.tvTotalPrice);
         tvTotalPrice.setText(String.format("Tổng tiền: %sđ", currencyFormatter.format(totalCarSupplyPriceLong + totalCarServicePriceLong)));
 
-        Button footerButton = findViewById(R.id.footerButton);
-        footerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ConfirmationDialog.showConfirmationDialog(RepairingCarDetailActivity.this, "Xác nhận?",
-                        "Bạn có chắc xe này đã sửa xong?",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                                db.collection("Car")
-                                        .document(carId)
-                                        .update("state", 2)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-                                                finish();
-                                            }
-                                        });
-                            }
-                        });
-            }
-        });
     }
 
     @Override

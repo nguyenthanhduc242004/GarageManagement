@@ -2,10 +2,12 @@ package com.example.garagemanagement;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -15,8 +17,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -27,13 +31,23 @@ import com.example.garagemanagement.Objects.CarBrand;
 import com.example.garagemanagement.Objects.CarType;
 import com.example.garagemanagement.adapter.CarBrandSpinnerAdapter;
 import com.example.garagemanagement.adapter.CarTypeSpinnerAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UpdateCarActivity extends AppCompatActivity {
     Button buttonDate;
@@ -41,6 +55,23 @@ public class UpdateCarActivity extends AppCompatActivity {
     ImageView ivCarImage;
     Button buttonOpenCamera;
     Button buttonDeleteImage;
+
+    private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+
+    ProgressDialog progressDialog;
+    List<CarBrand> allCarBrands = new ArrayList<>();
+    List<CarType> allCarTypes = new ArrayList<>();
+
+    String carBrandId;
+    String carTypeId;
+
+    boolean gotCarBrandText = false;
+    boolean gotCarTypeText = false;
+    String carBrandText;
+    String carTypeText;
+    Date receiveDate;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,21 +93,25 @@ public class UpdateCarActivity extends AppCompatActivity {
             }
         });
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage("Đang tải...");
+//        progressDialog.show();
+
 //        BASIC CAR INFORMATION:
+        String carId = getIntent().getStringExtra("CAR_ID");
         String licensePlate = getIntent().getStringExtra("LICENSE_PLATE");
-        String carBrandId = getIntent().getStringExtra("CAR_BRAND_ID");
-        String carBrandText = getIntent().getStringExtra("CAR_BRAND_TEXT");
-        String carTypeId = getIntent().getStringExtra("CAR_TYPE_ID");
-        String carTypeText = getIntent().getStringExtra("CAR_TYPE_TEXT");
+        carBrandId = getIntent().getStringExtra("CAR_BRAND_ID");
+        carBrandText = getIntent().getStringExtra("CAR_BRAND_TEXT");
+        carTypeId = getIntent().getStringExtra("CAR_TYPE_ID");
+        carTypeText = getIntent().getStringExtra("CAR_TYPE_TEXT");
         String ownerName = getIntent().getStringExtra("OWNER_NAME");
         String phoneNumber = getIntent().getStringExtra("PHONE_NUMBER");
-        String receiveDate = getIntent().getStringExtra("RECEIVE_DATE");
+        receiveDate = (Date) getIntent().getSerializableExtra("RECEIVE_DATE");
         int carImage = getIntent().getIntExtra("CAR_IMAGE", 0);
         int state = getIntent().getIntExtra("STATE", -1);
 
         EditText etLicensePlate = findViewById(R.id.etLicensePlate);
-        Spinner spinnerCarBrand = findViewById(R.id.spinnerCarBrand);
-        Spinner spinnerCarType = findViewById(R.id.spinnerCarType);
         EditText etOwnerName = findViewById(R.id.etOwnerName);
         EditText etPhoneNumber = findViewById(R.id.etPhoneNumber);
         buttonDate = findViewById(R.id.buttonDate);
@@ -87,77 +122,97 @@ public class UpdateCarActivity extends AppCompatActivity {
         etPhoneNumber.setText(phoneNumber);
 
 //        CAR BRAND SPINNER:
-        // CALL API CarBrand:
-        String carBrandJson = "[\n" +
-                "        {\"carBrandId\": 1, \"carBrandText\": \"Honda\"},\n" +
-                "        {\"carBrandId\": 2, \"carBrandText\": \"Aston Martin\"},\n" +
-                "        {\"carBrandId\": 3, \"carBrandText\": \"Suzuki\"},\n" +
-                "        {\"carBrandId\": 4, \"carBrandText\": \"Vinfast\"}\n" +
-                "]";
-        Gson gson = new GsonBuilder().create();
-        List<CarBrand> carBrands = gson.fromJson(carBrandJson, new TypeToken<List<CarBrand>>() {}.getType());
+        Spinner spinnerCarBrand = findViewById(R.id.spinnerCarBrand);
+        progressDialog.show();
+        db.collection("CarBrand")
+                .whereEqualTo("usable", true)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
+                            CarBrand carBrand = documentSnapshot.toObject(CarBrand.class);
+                            carBrand.setCarBrandId(documentSnapshot.getId());
+                            allCarBrands.add(carBrand);
+                        }
 
-        CarBrandSpinnerAdapter carBrandSpinnerAdapter = new CarBrandSpinnerAdapter(this, R.layout.item_car_brand_selected, carBrands);
-        spinnerCarBrand.setAdapter(carBrandSpinnerAdapter);
-        int spinnerCarBrandIndex = 0;
-        for (int i = 0; i < carBrands.size(); i++) {
-            if (carBrands.get(i).getCarBrandId().equals(carBrandId)) {
-                spinnerCarBrandIndex = i;
-                break;
-            }
-        }
-        spinnerCarBrand.setSelection(spinnerCarBrandIndex);
-        spinnerCarBrand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
-            }
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
+                        CarBrandSpinnerAdapter carBrandSpinnerAdapter = new CarBrandSpinnerAdapter(getApplicationContext(), R.layout.item_car_brand_selected, allCarBrands);
+                        spinnerCarBrand.setAdapter(carBrandSpinnerAdapter);
+                        for (int i = 0; i < allCarBrands.size(); i++) {
+                            if (allCarBrands.get(i).getCarBrandId().equals(carBrandId)) {
+                                spinnerCarBrand.setSelection(i);
+                                break;
+                            }
+                        }
+                        spinnerCarBrand.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                // Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
+                                carBrandId = carBrandSpinnerAdapter.getItem(i).getCarBrandId();
+                                carBrandText = carBrandSpinnerAdapter.getItem(i).getCarBrandText();
+                            }
 
-            }
-        });
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+
+                            }
+                        });
+                    }
+                });
 
 
-//        CAR TYPE SPINNER:
-        // CALL API CarBrand:
-        String carTypeJson = "[\n" +
-                "  {\"carTypeId\": 1, \"carTypeText\": \"Mini\"},\n" +
-                "  {\"carTypeId\": 2, \"carTypeText\": \"Sedan\"},\n" +
-                "  {\"carTypeId\": 3, \"carTypeText\": \"SUV\"},\n" +
-                "  {\"carTypeId\": 4, \"carTypeText\": \"Luxury\"}\n" +
-                "]";
-        Gson gson1 = new GsonBuilder().create();
-        List<CarType> carTypes = gson1.fromJson(carTypeJson, new TypeToken<List<CarType>>() {}.getType());
+//        CAR BRAND SPINNER:
+        Spinner spinnerCarType = findViewById(R.id.spinnerCarType);
+        progressDialog.show();
+        db.collection("CarType")
+                .whereEqualTo("usable", true)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                            CarType carType = documentSnapshot.toObject(CarType.class);
+                            carType.setCarTypeId(documentSnapshot.getId());
+                            allCarTypes.add(carType);
+                        }
 
-        CarTypeSpinnerAdapter carTypeSpinnerAdapter = new CarTypeSpinnerAdapter(this, R.layout.item_car_type_selected, carTypes);
-        spinnerCarType.setAdapter(carTypeSpinnerAdapter);
-        int spinnerCarTypeIndex = 0;
-        for (int i = 0; i < carTypes.size(); i++) {
-            if (carTypes.get(i).getCarTypeId().equals(carTypeId)) {
-                spinnerCarTypeIndex = i;
-                break;
-            }
-        }
-        spinnerCarType.setSelection(spinnerCarTypeIndex);
-        spinnerCarType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
-            }
+                        if (progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                        }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
+                        CarTypeSpinnerAdapter carTypeSpinnerAdapter = new CarTypeSpinnerAdapter(getApplicationContext(), R.layout.item_car_type_selected, allCarTypes);
+                        spinnerCarType.setAdapter(carTypeSpinnerAdapter);
+                        for (int i = 0; i < allCarTypes.size(); i++) {
+                            if (allCarTypes.get(i).getCarTypeId().equals(carTypeId)) {
+                                spinnerCarType.setSelection(i);
+                                break;
+                            }
+                        }
+                        spinnerCarType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                //                Toast.makeText(AddCarActivity.this, carBrandAdapter.getItem(i), Toast.LENGTH_SHORT).show();
+                                carTypeId = carTypeSpinnerAdapter.getItem(i).getCarTypeId();
+                                carTypeText = carTypeSpinnerAdapter.getItem(i).getCarTypeText();
+                            }
 
-            }
-        });
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+
+                            }
+                        });
+                    }
+                });
 
 
 //        DATE PICKER:
         buttonDate = findViewById(R.id.buttonDate);
         initDatePicker();
-        buttonDate.setText(receiveDate);
+        buttonDate.setText(formatter.format(receiveDate));
         buttonDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -207,11 +262,43 @@ public class UpdateCarActivity extends AppCompatActivity {
         });
 
         Button buttonUpdate = findViewById(R.id.footerButtonRight);
-        buttonUpdate.setText("Cập Nhật");
+        buttonUpdate.setText("Cập nhật");
         buttonUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Do Logic Here......
+                Map<String, Object> carData = new HashMap<>();
+                carData.put("licensePlate", etLicensePlate.getText().toString());
+                carData.put("carBrandId", carBrandId);
+                carData.put("carTypeId", carTypeId);
+                carData.put("ownerName", etOwnerName.getText().toString());
+                carData.put("phoneNumber", etPhoneNumber.getText().toString());
+                carData.put("receiveDate", receiveDate);
+                carData.put("carImage", 0);
+                carData.put("state", 0);
+                db.collection("Car")
+                        .document(carId)
+                        .update(carData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Toast.makeText(getApplicationContext(), "Sửa thông tin xe thành công!", Toast.LENGTH_SHORT).show();
+                                NewCarDetailActivity.licensePlate = etLicensePlate.getText().toString();
+                                NewCarDetailActivity.carBrandId = carBrandId;
+                                NewCarDetailActivity.carTypeId = carTypeId;
+                                NewCarDetailActivity.phoneNumber = etPhoneNumber.getText().toString();
+                                NewCarDetailActivity.receiveDate = receiveDate;
+                                NewCarDetailActivity.ownerName = etOwnerName.getText().toString();
+                                NewCarDetailActivity.carBrandText = carBrandText;
+                                NewCarDetailActivity.carTypeText = carTypeText;
+                                finish();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getApplicationContext(), "Sửa thông tin xe không thành công!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         });
     }
@@ -223,6 +310,7 @@ public class UpdateCarActivity extends AppCompatActivity {
                 month = month + 1;
                 String date = makeDateString(day, month, year);
                 buttonDate.setText(date);
+                receiveDate = new Date (year - 1900, month - 1, day);
             }
         };
 

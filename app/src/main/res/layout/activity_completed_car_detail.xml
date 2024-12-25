@@ -33,17 +33,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="SỬA THÔNG TIN"
+                android:text="THÔNG TIN XE"
                 android:textColor="@color/textColor"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
             <include
-                android:id="@+id/update_repairing_car"
-                layout="@layout/update_repairing_car"
+                android:id="@+id/repairing_car_detail"
+                layout="@layout/repairing_car_detail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tvHeading"/>
+
+            <TextView
+                android:id="@+id/tvPaymentDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="Ngày Thanh Toán: 1/1/2024"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"
+                android:textColor="@color/textColor"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="4dp"
+                android:textSize="17sp"
+                android:layout_below="@+id/repairing_car_detail"/>
         </RelativeLayout>
     </ScrollView>
 
@@ -55,28 +69,6 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:paddingBottom="12dp">
-
-        <Button
-            android:id="@+id/footerButtonLeft"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:layout_weight="1"
-            android:paddingVertical="4dp"
-            android:backgroundTint="@color/yellow"
-            android:text="Quay lại"
-            android:textColor="@color/white" />
-
-        <Button
-            android:id="@+id/footerButtonRight"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:layout_weight="1"
-            android:paddingVertical="4dp"
-            android:backgroundTint="@color/green"
-            android:text="Cập nhật"
-            android:textColor="@color/white" />
     </LinearLayout>
 
 

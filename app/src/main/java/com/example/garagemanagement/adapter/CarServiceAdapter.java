@@ -129,12 +129,6 @@ public class CarServiceAdapter extends RecyclerView.Adapter<CarServiceAdapter.Ca
                                                         }
                                                     });
                                         }
-                                    }, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            // Perform actions when the user confirms
-                                            // (e.g., delete data, proceed with an action)
-                                        }
                                     });
                         }
                     });

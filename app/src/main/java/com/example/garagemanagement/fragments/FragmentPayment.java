@@ -2,6 +2,7 @@ package com.example.garagemanagement.fragments;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import com.example.garagemanagement.CompletedCarDetailActivity;
 import com.example.garagemanagement.DateDeserializer;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
@@ -31,6 +33,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.Serializable;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -64,7 +67,7 @@ public class FragmentPayment extends Fragment implements RecyclerViewInterface {
     Button buttonPaymentDateLeft;
     Button buttonPaymentDateRight;
 
-    long todayTime = atEndOfDay(new Date()).getTime();
+    long todayTime = atEndOfDay((new Date())).getTime();
     long receiveDateMax = todayTime;
     long receiveDateMin = 0;
     long paymentDateMax = todayTime;
@@ -73,6 +76,7 @@ public class FragmentPayment extends Fragment implements RecyclerViewInterface {
     Calendar c = Calendar.getInstance();
 
     CarAdapter carAdapter;
+    List<Car> cars = new ArrayList<>();
     List<Car> filteredList = new ArrayList<>();
     List<Car> paidCars = new ArrayList<>();
     List<Car> filterListByDate = new ArrayList<>();
@@ -144,6 +148,22 @@ public class FragmentPayment extends Fragment implements RecyclerViewInterface {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        cars = FragmentHome.cars;
+        paidCars = new ArrayList<>();
+        for (Car car : cars) {
+            if (car.getState() == 3) {
+                paidCars.add(car);
+            }
+        }
+        filteredList = paidCars;
+        filterListByDate = paidCars;
+        carAdapter.setData(filteredList);
+        txtSearch.setText("");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -183,7 +203,7 @@ public class FragmentPayment extends Fragment implements RecyclerViewInterface {
             }
         });
 
-        List<Car> cars = new ArrayList<>();
+        cars = FragmentHome.cars;
         paidCars = new ArrayList<>();
         for (Car car : cars) {
             if (car.getState() == 3) {
@@ -462,7 +482,22 @@ public class FragmentPayment extends Fragment implements RecyclerViewInterface {
 
     @Override
     public void onItemClick(int position) {
-
+        Intent intent = new Intent(getContext(), CompletedCarDetailActivity.class);
+        intent.putExtra("CAR_ID", filteredList.get(position).getCarId());
+        intent.putExtra("LICENSE_PLATE", filteredList.get(position).getLicensePlate());
+        intent.putExtra("CAR_BRAND_ID", filteredList.get(position).getCarBrandId());
+        intent.putExtra("CAR_BRAND_TEXT", filteredList.get(position).getCarBrandText());
+        intent.putExtra("CAR_TYPE_ID", filteredList.get(position).getCarTypeId());
+        intent.putExtra("CAR_TYPE_TEXT", filteredList.get(position).getCarTypeText());
+        intent.putExtra("OWNER_NAME", filteredList.get(position).getOwnerName());
+        intent.putExtra("PHONE_NUMBER", filteredList.get(position).getPhoneNumber());
+        intent.putExtra("RECEIVE_DATE", filteredList.get(position).getReceiveDate());
+        intent.putExtra("CAR_IMAGE", filteredList.get(position).getCarImage());
+        intent.putExtra("STATE", 3);
+        intent.putExtra("CAR_SERVICES", (Serializable) filteredList.get(position).getCarServiceList());
+        intent.putExtra("CAR_SUPPLIES", (Serializable) filteredList.get(position).getCarSupplyList());
+        intent.putExtra("PAYMENT_DATE", filteredList.get(position).getPaymentDate());
+        startActivity(intent);
     }
 
     @Override

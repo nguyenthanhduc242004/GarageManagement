@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         android:layout_below="@+id/toggleCarInformationButton">
-        <include layout="@layout/form_car"
+        <include layout="@layout/car_detail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />

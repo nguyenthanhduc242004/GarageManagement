@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.example.garagemanagement.AddCarActivity;
 import com.example.garagemanagement.AddRepairCardActivity;
+import com.example.garagemanagement.CompletedCarDetailActivity;
 import com.example.garagemanagement.MainActivity;
 import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
@@ -42,6 +43,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -75,8 +77,8 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
     private String mParam2;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
-    List<Car> cars = new ArrayList<>();
-    public static List<Car> newCars = new ArrayList<>();
+    public static List<Car> cars = new ArrayList<>();
+    List<Car> newCars = new ArrayList<>();
     List<Car> repairingCars = new ArrayList<>();
     List<Car> completedCars = new ArrayList<>();
 
@@ -118,31 +120,6 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        cars = MainActivity.cars;
-//        newCars = new ArrayList<>();
-//        repairingCars = new ArrayList<>();
-//        completedCars = new ArrayList<>();
-//
-//        for (int i = 0; i < cars.size(); i++) {
-//            int state = cars.get(i).getState();
-//            if (state == 0) {
-//                newCars.add(cars.get(i));
-//            }
-//            else if (state == 1) {
-//                repairingCars.add(cars.get(i));
-//            }
-//            else if (state == 2) {
-//                completedCars.add(cars.get(i));
-//            }
-//        }
-//        newCarsAdapter.setData(newCars);
-//        repairingCarsAdapter.setData(repairingCars);
-//        completedCarsAdapter.setData(completedCars);
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -253,8 +230,9 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
 
 
     private void EventChangeListener() {
+        cars = new ArrayList<>();
         db.collection("Car")
-                .orderBy("receiveDate")
+                .orderBy("receiveDate", Query.Direction.DESCENDING)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -271,36 +249,73 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                             car.setCarId(document.getId());
                             int state = car.getState();
                             if (type == DocumentChange.Type.ADDED) {
-                                if (state == 0) {
+                                if (state == 0 && newCars.size() <= 6) {
                                     newCars.add(car);
                                     setCarBrandTextAndCarTypeTextToAdapter(car, newCars, newCarsAdapter);
-                                } else if (state == 1) {
+                                } else if (state == 1 && repairingCars.size() <= 6) {
                                     repairingCars.add(car);
                                     setCarBrandTextAndCarTypeTextToAdapter(car, repairingCars, repairingCarsAdapter);
-                                    setCarServiceListAndCarTypeListToAdapter(car, newCars, newCarsAdapter);
+                                    setCarServiceListAndCarTypeListToAdapter(car, repairingCars, repairingCarsAdapter);
 
-                                } else if (state == 2) {
+                                } else if (state == 2 && completedCars.size() <= 6) {
                                     completedCars.add(car);
                                     setCarBrandTextAndCarTypeTextToAdapter(car, completedCars, completedCarsAdapter);
-                                    setCarServiceListAndCarTypeListToAdapter(car, newCars, newCarsAdapter);
+                                    setCarServiceListAndCarTypeListToAdapter(car, completedCars, completedCarsAdapter);
+                                } else if (state == 3) {
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, cars, null);
+                                    setCarServiceListAndCarTypeListToAdapter(car, cars, null);
                                 }
+                                cars.add(car);
                             }
                             else if (type == DocumentChange.Type.MODIFIED) {
                                 for (int i = 0; i < newCars.size(); i++) {
                                     if (car.getCarId().equals(newCars.get(i).getCarId())) {
                                         newCars.set(i, car);
+                                        if (state == 1) {
+                                            repairingCars.add(newCars.remove(i));
+                                        }
                                         break;
                                     }
                                 }
                                 for (int i = 0; i < repairingCars.size(); i++) {
                                     if (car.getCarId().equals(repairingCars.get(i).getCarId())) {
                                         repairingCars.set(i, car);
+                                        if (state == 2) {
+                                            completedCars.add(repairingCars.remove(i));
+                                        }
                                         break;
                                     }
                                 }
                                 for (int i = 0; i < completedCars.size(); i++) {
                                     if (car.getCarId().equals(completedCars.get(i).getCarId())) {
                                         completedCars.set(i, car);
+                                        if (state == 3) {
+                                            completedCars.remove(i);
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (state == 0) {
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, newCars, newCarsAdapter);
+                                } else if (state == 1) {
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, repairingCars, repairingCarsAdapter);
+                                    setCarServiceListAndCarTypeListToAdapter(car, repairingCars, repairingCarsAdapter);
+                                } else if (state == 2 ){
+                                    setCarBrandTextAndCarTypeTextToAdapter(car, completedCars, completedCarsAdapter);
+                                    setCarServiceListAndCarTypeListToAdapter(car, completedCars, completedCarsAdapter);
+                                }
+
+                                for (int i = 0; i < cars.size(); i++) {
+                                    if (car.getCarId().equals(cars.get(i).getCarId())) {
+                                        completedCars.set(i, car);
+                                        break;
+                                    }
+                                }
+                            }
+                            else if (type == DocumentChange.Type.REMOVED) {
+                                for (int i = 0; i < newCars.size(); i++) {
+                                    if (car.getCarId().equals(newCars.get(i).getCarId())) {
+                                        newCars.remove(i);
                                         break;
                                     }
                                 }
@@ -324,7 +339,9 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                         for (int i = 0; i < carList.size(); i++) {
                             if (carList.get(i).getCarId().equals(car.getCarId())) {
                                 carList.get(i).setCarBrandText(documentSnapshot.getString("carBrandText"));
-                                carAdapter.notifyDataSetChanged();
+                                if (carAdapter != null) {
+                                    carAdapter.notifyDataSetChanged();
+                                }
                                 if (progressDialog.isShowing())
                                     progressDialog.dismiss();
                                 break;
@@ -342,7 +359,9 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                         for (int i = 0; i < carList.size(); i++) {
                             if (carList.get(i).getCarId().equals(car.getCarId())) {
                                 carList.get(i).setCarTypeText(documentSnapshot.getString("carTypeText"));
-                                carAdapter.notifyDataSetChanged();
+                                if (carAdapter != null) {
+                                    carAdapter.notifyDataSetChanged();
+                                }
                                 if (progressDialog.isShowing())
                                     progressDialog.dismiss();
                                 break;
@@ -372,7 +391,9 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                                 for (int j = 0; j < carList.size(); j++) {
                                     if (carList.get(j).getCarId().equals(car.getCarId())) {
                                         carList.get(j).setCarServiceList(carServiceList);
-                                        carAdapter.notifyDataSetChanged();
+                                        if (carAdapter != null) {
+                                            carAdapter.notifyDataSetChanged();
+                                        }
                                         if (progressDialog.isShowing())
                                             progressDialog.dismiss();
                                         break;
@@ -406,7 +427,9 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                                 for (int j = 0; j < carList.size(); j++) {
                                     if (carList.get(j).getCarId().equals(car.getCarId())) {
                                         carList.get(j).setCarSupplyList(carSupplyList);
-                                        carAdapter.notifyDataSetChanged();
+                                        if (carAdapter != null) {
+                                            carAdapter.notifyDataSetChanged();
+                                        }
                                         if (progressDialog.isShowing())
                                             progressDialog.dismiss();
                                         break;
@@ -429,6 +452,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         if (state == 0) {
             if (newCars.get(position).getCarBrandText() != null && newCars.get(position).getCarTypeText() != null) {
                 Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
+                intent.putExtra("CAR_ID", newCars.get(position).getCarId());
                 intent.putExtra("LICENSE_PLATE", newCars.get(position).getLicensePlate());
                 intent.putExtra("CAR_BRAND_ID", newCars.get(position).getCarBrandId());
                 intent.putExtra("CAR_BRAND_TEXT", newCars.get(position).getCarBrandText());
@@ -436,7 +460,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
                 intent.putExtra("CAR_TYPE_TEXT", newCars.get(position).getCarTypeText());
                 intent.putExtra("OWNER_NAME", newCars.get(position).getOwnerName());
                 intent.putExtra("PHONE_NUMBER", newCars.get(position).getPhoneNumber());
-                intent.putExtra("RECEIVE_DATE", formatter.format(newCars.get(position).getReceiveDate()));
+                intent.putExtra("RECEIVE_DATE", newCars.get(position).getReceiveDate());
                 intent.putExtra("CAR_IMAGE", newCars.get(position).getCarImage());
                 intent.putExtra("STATE", state);
                 startActivity(intent);
@@ -444,6 +468,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
         }
         else if (state == 1) {
             Intent intent = new Intent(getContext(), RepairingCarDetailActivity.class);
+            intent.putExtra("CAR_ID", repairingCars.get(position).getCarId());
             intent.putExtra("LICENSE_PLATE", repairingCars.get(position).getLicensePlate());
             intent.putExtra("CAR_BRAND_ID", repairingCars.get(position).getCarBrandId());
             intent.putExtra("CAR_BRAND_TEXT", repairingCars.get(position).getCarBrandText());
@@ -451,11 +476,28 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             intent.putExtra("CAR_TYPE_TEXT", repairingCars.get(position).getCarTypeText());
             intent.putExtra("OWNER_NAME", repairingCars.get(position).getOwnerName());
             intent.putExtra("PHONE_NUMBER", repairingCars.get(position).getPhoneNumber());
-            intent.putExtra("RECEIVE_DATE", formatter.format(repairingCars.get(position).getReceiveDate()));
+            intent.putExtra("RECEIVE_DATE", repairingCars.get(position).getReceiveDate());
             intent.putExtra("CAR_IMAGE", repairingCars.get(position).getCarImage());
             intent.putExtra("STATE", state);
             intent.putExtra("CAR_SERVICES", (Serializable) repairingCars.get(position).getCarServiceList());
             intent.putExtra("CAR_SUPPLIES", (Serializable) repairingCars.get(position).getCarSupplyList());
+            startActivity(intent);
+        }
+        else if (state == 2) {
+            Intent intent = new Intent(getContext(), CompletedCarDetailActivity.class);
+            intent.putExtra("CAR_ID", completedCars.get(position).getCarId());
+            intent.putExtra("LICENSE_PLATE", completedCars.get(position).getLicensePlate());
+            intent.putExtra("CAR_BRAND_ID", completedCars.get(position).getCarBrandId());
+            intent.putExtra("CAR_BRAND_TEXT", completedCars.get(position).getCarBrandText());
+            intent.putExtra("CAR_TYPE_ID", completedCars.get(position).getCarTypeId());
+            intent.putExtra("CAR_TYPE_TEXT", completedCars.get(position).getCarTypeText());
+            intent.putExtra("OWNER_NAME", completedCars.get(position).getOwnerName());
+            intent.putExtra("PHONE_NUMBER", completedCars.get(position).getPhoneNumber());
+            intent.putExtra("RECEIVE_DATE", completedCars.get(position).getReceiveDate());
+            intent.putExtra("CAR_IMAGE", completedCars.get(position).getCarImage());
+            intent.putExtra("STATE", state);
+            intent.putExtra("CAR_SERVICES", (Serializable) completedCars.get(position).getCarServiceList());
+            intent.putExtra("CAR_SUPPLIES", (Serializable) completedCars.get(position).getCarSupplyList());
             startActivity(intent);
         }
     }

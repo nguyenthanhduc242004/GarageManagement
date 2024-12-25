@@ -53,7 +53,9 @@ import com.google.gson.reflect.TypeToken;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,14 +75,16 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     ProgressDialog progressDialog;
 
+    List<Car> cars = new ArrayList<>();
     List<Car> newCars = new ArrayList<>();
     CarSpinnerAdapter carSpinnerAdapter;
     List<CarService> allCarServices = new ArrayList<>();
     List<CarSupply> allCarSupplies = new ArrayList<>();
 
     List<CarService> selectedCarServices = new ArrayList<>();
-
     public static List<CarSupply> selectedCarSupplies = new ArrayList<>();
+
+
 
     public void openCarSupplyDialog(View view) {
         CustomCarSupplyDialog customCarSupplyDialog = new CustomCarSupplyDialog();
@@ -90,6 +94,10 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
     @Override
     protected void onStop() {
         super.onStop();
+        for (int i = 0; i < newCars.size(); i++) {
+            newCars.get(i).setCarServiceList(new ArrayList<>());
+            newCars.get(i).setCarSupplyList(new ArrayList<>());
+        }
         selectedCarSupplies = new ArrayList<>();
     }
 
@@ -134,10 +142,29 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         Spinner spinner = findViewById(R.id.spinner);
 
         // GET CARS DATA
-        newCars = FragmentHome.newCars;
+        cars = FragmentHome.cars;
+        newCars = new ArrayList<>();
+        for (Car car : cars) {
+            if (car.getState() == 0) {
+                newCars.add(car);
+            }
+        }
         currentCar = newCars.get(0);
         carSpinnerAdapter = new CarSpinnerAdapter(getApplicationContext(), R.layout.item_car_brand_selected, newCars);
         spinner.setAdapter(carSpinnerAdapter);
+
+//        SET SPINNER POSITION
+        String passedCarId = getIntent().getStringExtra("CAR_ID");
+        if (passedCarId != null) {
+            int spinnerPosition = 0;
+            for (int i = 0; i < newCars.size(); i++) {
+                if (passedCarId.equals(newCars.get(i).getCarId())) {
+                    spinnerPosition = i;
+                    break;
+                }
+            }
+            spinner.setSelection(spinnerPosition);
+        }
 
         totalCarServicePrice = findViewById(R.id.totalCarServicePrice);
         totalCarSupplyPrice = findViewById(R.id.totalCarSupplyPrice);
@@ -408,7 +435,29 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         addCarSupplyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openCarSupplyDialog(view);
+                if (CustomCarSupplyDialog.allCarSupplies.isEmpty()) {
+                    progressDialog.show();
+                    db.collection("CarSupply")
+                            .get()
+                            .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
+                                        CarSupply carSupply = documentSnapshot.toObject(CarSupply.class);
+                                        carSupply.setSupplyId(documentSnapshot.getId());
+                                        carSupply.setQuantity(0);
+                                        allCarSupplies.add(carSupply);
+                                    }
+                                    if (progressDialog.isShowing()) {
+                                        progressDialog.dismiss();
+                                    }
+                                    CustomCarSupplyDialog.allCarSupplies = allCarSupplies;
+                                    openCarSupplyDialog(view);
+                                }
+                            });
+                } else {
+                    openCarSupplyDialog(view);
+                }
             }
         });
 
@@ -416,20 +465,44 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                db.collection("Car")
-//                        .document(currentCar.getCarId())
-//                        .update()
                 if (currentCar.getCarServiceList().isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Vui lòng chọn ít nhất một dịch vụ!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Log.i("carId", currentCar.getCarId());
-                    Log.i("ownerName", currentCar.getOwnerName());
+                    Map<String, Object> carData = new HashMap<>();
+                    carData.put("licensePlate", currentCar.getLicensePlate());
+                    carData.put("carBrandId", currentCar.getCarBrandId());
+                    carData.put("carTypeId", currentCar.getCarTypeId());
+                    carData.put("ownerName", currentCar.getOwnerName());
+                    carData.put("phoneNumber", currentCar.getPhoneNumber());
+                    carData.put("receiveDate", currentCar.getReceiveDate());
+                    List<String> carServicesData = new ArrayList<>();
                     for (int i = 0; i < currentCar.getCarServiceList().size(); i++) {
-                        Log.i("carService[" + i + "]", currentCar.getCarServiceList().get(i).getServiceName());
+                        carServicesData.add(currentCar.getCarServiceList().get(i).getServiceId());
                     }
+                    carData.put("carServices", carServicesData);
+                    Map<String, Integer> carSuppliesData = new HashMap<>();
                     for (int i = 0; i < currentCar.getCarSupplyList().size(); i++) {
-                        Log.i("carSupply[" + i + "]", currentCar.getCarSupplyList().get(i).getSupplyName() + " SL: " + currentCar.getCarSupplyList().get(i).getQuantity());
+                        carSuppliesData.put(currentCar.getCarSupplyList().get(i).getSupplyId(), currentCar.getCarSupplyList().get(i).getQuantity());
                     }
+                    carData.put("carSupplies", carSuppliesData);
+                    carData.put("state", 1);
+                    carData.put("carImage", 0);
+                    db.collection("Car")
+                            .document(currentCar.getCarId())
+                            .update(carData)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Toast.makeText(getApplicationContext(), "Lập phiếu sửa chữa thành công!", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(getApplicationContext(), "Lập phiếu sửa chữa không thành công!", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                 }
 
             }
@@ -456,6 +529,7 @@ public class AddRepairCardActivity extends AppCompatActivity implements Recycler
     @Override
     public void setCarSupplyAdapterData(List<CarSupply> carSupplies) {
         carSupplyAdapter.setData(carSupplies);
+        currentCar.setCarSupplyList(carSupplies);
         AddRepairCardActivity.selectedCarSupplies = carSupplies;
     }
 }

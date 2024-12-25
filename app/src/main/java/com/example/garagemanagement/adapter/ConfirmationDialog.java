@@ -11,8 +11,7 @@ import com.example.garagemanagement.R;
 public class ConfirmationDialog {
 
     public static void showConfirmationDialog(Context context, String title, String message,
-                                              DialogInterface.OnClickListener onConfirmClickListener,
-                                              DialogInterface.OnClickListener onCancelClickListener) {
+                                              DialogInterface.OnClickListener onConfirmClickListener) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
@@ -20,9 +19,14 @@ public class ConfirmationDialog {
         builder.setIcon(AppCompatResources.getDrawable(builder.getContext(), R.drawable.baseline_warning_24));
 
         builder.setPositiveButton("Xác nhận", onConfirmClickListener);
-        builder.setNegativeButton("Thoát", onCancelClickListener);
+        builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
+            }
+        });
         AlertDialog dialog = builder.create();
+
         dialog.show();
-    }
+    };
 }

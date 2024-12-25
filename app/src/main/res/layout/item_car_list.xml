@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingHorizontal="4dp"
     android:paddingVertical="8dp"
-    android:background="@drawable/square_border">
+    android:background="@drawable/square_border"
+    android:minHeight="48dp">
 
     <TextView
         android:id="@+id/tvOwnerName"

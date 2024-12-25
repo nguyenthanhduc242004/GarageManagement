@@ -67,7 +67,7 @@
             android:layout_marginTop="12dp"
             android:backgroundTint="@color/white"
             android:paddingVertical="12dp"
-            android:text="Thêm Dịch Vụ"
+            android:text="Lập Phiếu Sửa Chữa"
             android:textColor="@color/textColor"
             android:textSize="16sp"
             app:strokeColor="#000"

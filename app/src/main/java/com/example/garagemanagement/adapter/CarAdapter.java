@@ -1,20 +1,32 @@
 package com.example.garagemanagement.adapter;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.garagemanagement.AddRepairCardActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
 import com.example.garagemanagement.Objects.Car;
 import com.example.garagemanagement.R;
+import com.example.garagemanagement.RepairingCarDetailActivity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -24,6 +36,8 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
     public static final int TYPE_CAR_LIST = 1;
     public static final int TYPE_CAR_PAID = 2;
     private final int type;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
     private List<Car> cars;
@@ -90,18 +104,89 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
                 holder.homeCarLowerButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.red));
                 holder.homeCarUpperButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_home_repair_service_24, 0, 0, 0);
                 holder.homeCarLowerButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_delete_outline_24, 0, 0, 0);
+
+                holder.homeCarUpperButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(context, AddRepairCardActivity.class);
+                        intent.putExtra("CAR_ID", car.getCarId());
+                        startActivity(context, intent, new Bundle());
+                    }
+                });
+
+                holder.homeCarLowerButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ConfirmationDialog.showConfirmationDialog(context, "Xác nhận xóa!",
+                                "Bạn sẽ không thể hoàn tác sau khi thực hiện!",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        db.collection("Car")
+                                                .document(car.getCarId())
+                                                .delete()
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void unused) {
+                                                        Toast.makeText(context, "Xóa xe thành công!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Toast.makeText(context, "Xóa xe không thành công!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    }
+                                });
+                    }
+                });
             }
             else if (state == Car.STATE_REPAIRING) {
                 holder.homeCarUpperButton.setText("Sửa Xong");
                 holder.homeCarLowerButton.setVisibility(View.GONE);
                 holder.homeCarUpperButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.green));
                 holder.homeCarUpperButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_check_24, 0, 0, 0);
+
+                holder.homeCarUpperButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ConfirmationDialog.showConfirmationDialog(context, "Xác nhận?",
+                                "Bạn có chắc xe này đã sửa xong?",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        db.collection("Car")
+                                                .document(car.getCarId())
+                                                .update("state", 2);
+                                    }
+                                });
+
+                    }
+                });
             }
             else if (state == Car.STATE_COMPLETED) {
                 holder.homeCarLowerButton.setVisibility(View.GONE);
                 holder.homeCarUpperButton.setText("Thanh Toán");
                 holder.homeCarUpperButton.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.green));
                 holder.homeCarUpperButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.outline_payment_24, 0, 0, 0);
+
+                holder.homeCarUpperButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ConfirmationDialog.showConfirmationDialog(context, "Xác nhận?",
+                                "Bạn có chắc đã thanh toán xe này?",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                        db.collection("Car")
+                                                .document(car.getCarId())
+                                                .update("state", 3);
+                                    }
+                                });
+                    }
+                });
             }
         }
         else if (type == TYPE_CAR_LIST) {

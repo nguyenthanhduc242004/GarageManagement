@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.garagemanagement.CompletedCarDetailActivity;
 import com.example.garagemanagement.DateDeserializer;
 import com.example.garagemanagement.NewCarDetailActivity;
 import com.example.garagemanagement.Interfaces.RecyclerViewInterface;
@@ -91,6 +92,8 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         return fragment;
     }
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,37 +123,26 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             }
         });
 
-        List<Car> cars = new ArrayList<>();
+        cars = FragmentHome.cars;
         newCars = new ArrayList<>();
         repairingCars = new ArrayList<>();
         completedCars = new ArrayList<>();
         unpaidCars = new ArrayList<>();
-
-        for (int i = 0; i < cars.size(); i++) {
-            Car car = cars.get(i);
-            if (car.getState() == 0) {
+        for (Car car : cars) {
+            int state = car.getState();
+            if (state == 0) {
                 newCars.add(car);
                 unpaidCars.add(car);
-            } else if (car.getState() == 1) {
+            } else if (state == 1) {
                 repairingCars.add(car);
                 unpaidCars.add(car);
-            } else if (car.getState() == 2) {
+            } else if (state == 2) {
                 completedCars.add(car);
                 unpaidCars.add(car);
             }
         }
 
-//        int fragmentHomeState = FragmentHome.selectedState;
-//        Log.i("fragmentHomeStateUpper", String.valueOf(fragmentHomeState));
-//        if (fragmentHomeState == -1) {
-//            filteredList = unpaidCars;
-//        } else if (fragmentHomeState == 0) {
-//            filteredList = newCars;
-//        } else if (fragmentHomeState == 1) {
-//            filteredList = repairingCars;
-//        } else if (fragmentHomeState == 2) {
-//            filteredList = completedCars;
-//        }
+        filteredList = unpaidCars;
 
 //        CarDetailRecyclerView
         carAdapter = new CarAdapter(getContext(),CarAdapter.TYPE_CAR_LIST, this);
@@ -158,7 +150,6 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         RecyclerView recyclerViewCarList = view.findViewById(R.id.recyclerViewCarList);
         recyclerViewCarList.setLayoutManager(linearLayoutManager);
         recyclerViewCarList.setFocusable(false);
-        Log.i("FragmentHome.selectedState", String.valueOf(FragmentHome.selectedState));
         if (FragmentHome.selectedState == -1) {
             carAdapter.setData(filteredList);
         }
@@ -205,9 +196,27 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
     @Override
     public void onResume() {
         super.onResume();
+        cars = FragmentHome.cars;
+        newCars = new ArrayList<>();
+        repairingCars = new ArrayList<>();
+        completedCars = new ArrayList<>();
+        unpaidCars = new ArrayList<>();
+        for (Car car : cars) {
+            int state = car.getState();
+            if (state == 0) {
+                newCars.add(car);
+                unpaidCars.add(car);
+            } else if (state == 1) {
+                repairingCars.add(car);
+                unpaidCars.add(car);
+            } else if (state == 2) {
+                completedCars.add(car);
+                unpaidCars.add(car);
+            }
+        }
+
         selectedState = FragmentHome.selectedState;
         int fragmentHomeState = FragmentHome.selectedState;
-        Log.i("fragmentHomeState", String.valueOf(fragmentHomeState));
         if (fragmentHomeState == -1) {
             filteredList = unpaidCars;
             searchView.setQuery("", false);
@@ -272,6 +281,7 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
         int state = currentCar.getState();
         if (state == 0) {
             Intent intent = new Intent(getContext(), NewCarDetailActivity.class);
+            intent.putExtra("CAR_ID", currentCar.getCarId());
             intent.putExtra("LICENSE_PLATE", currentCar.getLicensePlate());
             intent.putExtra("CAR_BRAND_ID", currentCar.getCarBrandId());
             intent.putExtra("CAR_BRAND_TEXT", currentCar.getCarBrandText());
@@ -279,13 +289,14 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             intent.putExtra("CAR_TYPE_TEXT", currentCar.getCarTypeText());
             intent.putExtra("OWNER_NAME", currentCar.getOwnerName());
             intent.putExtra("PHONE_NUMBER", currentCar.getPhoneNumber());
-            intent.putExtra("RECEIVE_DATE", formatter.format(currentCar.getReceiveDate()));
+            intent.putExtra("RECEIVE_DATE", currentCar.getReceiveDate());
             intent.putExtra("CAR_IMAGE", currentCar.getCarImage());
             intent.putExtra("STATE", state);
             startActivity(intent);
         }
         else if (state == 1) {
             Intent intent = new Intent(getContext(), RepairingCarDetailActivity.class);
+            intent.putExtra("CAR_ID", currentCar.getCarId());
             intent.putExtra("LICENSE_PLATE", currentCar.getLicensePlate());
             intent.putExtra("CAR_BRAND_ID", currentCar.getCarBrandId());
             intent.putExtra("CAR_BRAND_TEXT", currentCar.getCarBrandText());
@@ -293,7 +304,24 @@ public class FragmentCars extends Fragment implements RecyclerViewInterface {
             intent.putExtra("CAR_TYPE_TEXT", currentCar.getCarTypeText());
             intent.putExtra("OWNER_NAME", currentCar.getOwnerName());
             intent.putExtra("PHONE_NUMBER", currentCar.getPhoneNumber());
-            intent.putExtra("RECEIVE_DATE", formatter.format(currentCar.getReceiveDate()));
+            intent.putExtra("RECEIVE_DATE", currentCar.getReceiveDate());
+            intent.putExtra("CAR_IMAGE", currentCar.getCarImage());
+            intent.putExtra("STATE", state);
+            intent.putExtra("CAR_SERVICES", (Serializable) currentCar.getCarServiceList());
+            intent.putExtra("CAR_SUPPLIES", (Serializable) currentCar.getCarSupplyList());
+            startActivity(intent);
+        }
+        else if (state == 2) {
+            Intent intent = new Intent(getContext(), CompletedCarDetailActivity.class);
+            intent.putExtra("CAR_ID", currentCar.getCarId());
+            intent.putExtra("LICENSE_PLATE", currentCar.getLicensePlate());
+            intent.putExtra("CAR_BRAND_ID", currentCar.getCarBrandId());
+            intent.putExtra("CAR_BRAND_TEXT", currentCar.getCarBrandText());
+            intent.putExtra("CAR_TYPE_ID", currentCar.getCarTypeId());
+            intent.putExtra("CAR_TYPE_TEXT", currentCar.getCarTypeText());
+            intent.putExtra("OWNER_NAME", currentCar.getOwnerName());
+            intent.putExtra("PHONE_NUMBER", currentCar.getPhoneNumber());
+            intent.putExtra("RECEIVE_DATE", currentCar.getReceiveDate());
             intent.putExtra("CAR_IMAGE", currentCar.getCarImage());
             intent.putExtra("STATE", state);
             intent.putExtra("CAR_SERVICES", (Serializable) currentCar.getCarServiceList());
