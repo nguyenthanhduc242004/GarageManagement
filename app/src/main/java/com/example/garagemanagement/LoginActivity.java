@@ -67,9 +67,12 @@ public class LoginActivity extends AppCompatActivity {
 //                TODO: DO LOGIN LOGIC HERE + CHECK ADMIN ACCOUNT!!!
                 Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                 // Navigate to the main activity or perform other actions
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
+                Intent intent2 = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent2);
                 finish();
+//                        Intent intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
+//        startActivity(intent);
+//        finish();
             }
         });
     }

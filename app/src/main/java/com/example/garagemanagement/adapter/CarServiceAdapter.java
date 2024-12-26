@@ -135,7 +135,7 @@ public class CarServiceAdapter extends RecyclerView.Adapter<CarServiceAdapter.Ca
                 }
             });
         } else if (type == TYPE_CAR_TYPE_PRICE) {
-            holder.tvPrice.setText(String.format("%sđ", formatter.format(carService.getPrices().get(carTypeId))));
+//            holder.tvPrice.setText(String.format("%sđ", formatter.format(carService.getPrices().get(carTypeId))));
         }
     }
 

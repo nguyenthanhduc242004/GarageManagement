@@ -497,6 +497,8 @@ public class FragmentPayment extends Fragment implements RecyclerViewInterface {
         intent.putExtra("CAR_SERVICES", (Serializable) filteredList.get(position).getCarServiceList());
         intent.putExtra("CAR_SUPPLIES", (Serializable) filteredList.get(position).getCarSupplyList());
         intent.putExtra("PAYMENT_DATE", filteredList.get(position).getPaymentDate());
+        intent.putExtra("CAR_SERVICE_DATA", (Serializable) filteredList.get(position).getCarServices());
+        intent.putExtra("CAR_SUPPLY_DATA", (Serializable) filteredList.get(position).getCarSupplies());
         startActivity(intent);
     }
 

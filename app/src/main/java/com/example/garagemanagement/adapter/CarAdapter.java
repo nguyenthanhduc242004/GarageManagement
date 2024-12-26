@@ -29,7 +29,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
     public static final int TYPE_CAR_HOME = 0;
@@ -180,9 +183,21 @@ public class CarAdapter extends RecyclerView.Adapter<CarAdapter.CarViewHolder> {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                        Map<String, Object> carData = new HashMap<>();
+                                        carData.put("licensePlate", car.getLicensePlate());
+                                        carData.put("carBrandId", car.getCarBrandId());
+                                        carData.put("carTypeId", car.getCarTypeId());
+                                        carData.put("ownerName", car.getOwnerName());
+                                        carData.put("phoneNumber", car.getPhoneNumber());
+                                        carData.put("receiveDate", car.getReceiveDate());
+                                        carData.put("carImage", 0);
+                                        carData.put("state", 3);
+                                        carData.put("carServices", car.getCarServices());
+                                        carData.put("carSupplies", car.getCarSupplies());
+                                        carData.put("paymentDate", new Date());
                                         db.collection("Car")
                                                 .document(car.getCarId())
-                                                .update("state", 3);
+                                                .update(carData);
                                     }
                                 });
                     }

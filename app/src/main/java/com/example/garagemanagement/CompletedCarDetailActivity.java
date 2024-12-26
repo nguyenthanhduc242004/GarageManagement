@@ -28,8 +28,10 @@ import com.example.garagemanagement.adapter.CarServiceAdapter;
 import com.example.garagemanagement.adapter.CarSupplyAdapter;
 import com.example.garagemanagement.adapter.ConfirmationDialog;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -91,6 +93,8 @@ public class CompletedCarDetailActivity extends AppCompatActivity implements Rec
         List<CarService> selectedCarServices = (List<CarService>) getIntent().getSerializableExtra("CAR_SERVICES");
         List<CarSupply> selectedCarSupplies = (List<CarSupply>) getIntent().getSerializableExtra("CAR_SUPPLIES");
         Date paymentDate = (Date) getIntent().getSerializableExtra("PAYMENT_DATE");
+        List<String> carServiceData = (List<String>) getIntent().getSerializableExtra("CAR_SERVICE_DATA");
+        Map<String, Integer> carSupplyData = (Map<String, Integer>) getIntent().getSerializableExtra("CAR_SUPPLY_DATA");
 
         TextView tvLicensePlate = findViewById(R.id.tvLicensePlate);
         TextView tvCarBrand = findViewById(R.id.tvCarBrand);
@@ -101,13 +105,51 @@ public class CompletedCarDetailActivity extends AppCompatActivity implements Rec
         TextView tvPaymentDate = findViewById(R.id.tvPaymentDate);
         ImageView ivCarImage = findViewById(R.id.ivCarImage);
 
+        Button footerButton = findViewById(R.id.footerButton);
+        if (state == 2) {
+            footerButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ConfirmationDialog.showConfirmationDialog(CompletedCarDetailActivity.this, "Xác nhận?",
+                            "Bạn có chắc đã thanh toán xe này?",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                    Map<String, Object> carData = new HashMap<>();
+                                    carData.put("licensePlate", licensePlate);
+                                    carData.put("carBrandId", carBrandId);
+                                    carData.put("carTypeId", carTypeId);
+                                    carData.put("ownerName", ownerName);
+                                    carData.put("phoneNumber", phoneNumber);
+                                    carData.put("receiveDate", receiveDate);
+                                    carData.put("carImage", 0);
+                                    carData.put("state", 3);
+                                    carData.put("carServices", carServiceData);
+                                    carData.put("carSupplies", carSupplyData);
+
+                                    carData.put("paymentDate", new Date());
+                                    db.collection("Car")
+                                            .document(carId)
+                                            .update(carData);
+                                }
+                            });
+                }
+            });
+        } else if (state == 3) {
+            footerButton.setVisibility(View.GONE);
+        }
+
         tvLicensePlate.setText(licensePlate);
         tvCarBrand.setText(carBrandText);
         tvCarType.setText(carTypeText);
         tvOwnerName.setText(ownerName);
         tvPhoneNumber.setText(phoneNumber);
         tvReceiveDate.setText(dateFormatter.format(receiveDate));
-        tvPaymentDate.setText(String.format("Ngày thanh toán: %s", dateFormatter.format(paymentDate)));
+        tvPaymentDate.setVisibility(View.GONE);
+        if (paymentDate != null) {
+            tvPaymentDate.setText(String.format("Ngày thanh toán: %s", dateFormatter.format(paymentDate)));
+        }
         if (carImage == 0) {
             ivCarImage.setImageResource(R.drawable.no_image);
         } else {

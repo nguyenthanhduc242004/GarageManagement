@@ -69,6 +69,17 @@
         android:orientation="horizontal"
         android:paddingHorizontal="12dp"
         android:paddingBottom="12dp">
+        <Button
+            android:id="@+id/footerButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_weight="1"
+            android:paddingVertical="4dp"
+            android:backgroundTint="@color/green"
+            android:text="Thanh Toán"
+            android:drawableLeft="@drawable/outline_payment_24"
+            android:textColor="@color/white" />
     </LinearLayout>
 
 

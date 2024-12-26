@@ -307,7 +307,7 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
 
                                 for (int i = 0; i < cars.size(); i++) {
                                     if (car.getCarId().equals(cars.get(i).getCarId())) {
-                                        completedCars.set(i, car);
+                                        cars.set(i, car);
                                         break;
                                     }
                                 }
@@ -498,6 +498,8 @@ public class FragmentHome extends Fragment implements RecyclerViewInterface {
             intent.putExtra("STATE", state);
             intent.putExtra("CAR_SERVICES", (Serializable) completedCars.get(position).getCarServiceList());
             intent.putExtra("CAR_SUPPLIES", (Serializable) completedCars.get(position).getCarSupplyList());
+            intent.putExtra("CAR_SERVICE_DATA", (Serializable) completedCars.get(position).getCarServices());
+            intent.putExtra("CAR_SUPPLY_DATA", (Serializable) completedCars.get(position).getCarSupplies());
             startActivity(intent);
         }
     }
